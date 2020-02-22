@@ -40,11 +40,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: 【user】 Checkout
       uses: actions/checkout@master
 
 
-    - name: Clone source code
+    - name: 【openwrt】 Clone source code
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
 
