@@ -72,13 +72,7 @@ jobs:
         chmod +x $DIY_SH
         ./$DIY_SH
         
-    # 自定义配置
-    - name: Load custom configuration
-      run: |
-        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
-        echo "defconfig start"
-        cd openwrt
-        make defconfig
+
         
         
     # 下载文件
@@ -97,8 +91,13 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-
-
+    # 自定义配置
+    - name: Load custom configuration
+      run: |
+        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
+        echo "defconfig start"
+        cd openwrt
+        make defconfig
         
 
     - name: SSH connection to Actions
