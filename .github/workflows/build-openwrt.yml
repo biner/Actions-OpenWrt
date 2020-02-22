@@ -47,18 +47,7 @@ jobs:
     - name: Clone source code
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Run DIY sh
-      run: |
-        chmod +x $DIY_SH
-        ./$DIY_SH
-        
-    # 自定义配置
-    - name: Load custom configuration
-      run: |
-        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
-        echo "defconfig start"
-        cd openwrt
-        make defconfig
+
         
     - name: Initialization environment
       env:
@@ -77,6 +66,19 @@ jobs:
         sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
+        
+    - name: Run DIY sh
+      run: |
+        chmod +x $DIY_SH
+        ./$DIY_SH
+        
+    # 自定义配置
+    - name: Load custom configuration
+      run: |
+        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
+        echo "defconfig start"
+        cd openwrt
+        make defconfig
         
         
     # 下载文件
