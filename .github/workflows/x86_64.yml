@@ -14,8 +14,8 @@ on:
   push:
     branches:
       - master
-    #paths:
-    #  - '.config'
+    paths:
+      - './makeconfig.d/x86-64/.config'
 #  schedule:
 #    - cron: 0 8 * * 5
 #  watch:
@@ -25,7 +25,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: .config
-  DEFCONFIG_FILE: x86_64.config
+  DEFCONFIG_FILE: ./makeconfig.d/x86-64/.config
   DIY_SH: diy.sh
   FREE_UP_DISK: false
   SSH_ACTIONS: false
@@ -94,7 +94,7 @@ jobs:
     # 自定义配置
     - name: Load custom configuration
       run: |
-        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
+        cp $DEFCONFIG_FILE ./openwrt/.config
         echo "defconfig start"
         cd openwrt
         make defconfig
