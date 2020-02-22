@@ -75,7 +75,7 @@ jobs:
       env:
         cache-name: cache-openwrt-dl
       with:
-        path: ./dl
+        path: ./openwrt/dl
         key: ${{ runner.os }}-stable-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
           
     - name: Update feeds
