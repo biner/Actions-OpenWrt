@@ -78,7 +78,7 @@ jobs:
     # 下载文件
     - name: Cache openwrt dl
       if: env.CACHE == 'true'
-      uses: biner/cache@master
+      uses: actions/cache@master
       env:
         cache-name: cache-openwrt-dl
       with:
