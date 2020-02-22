@@ -14,8 +14,8 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '.config'
+    #paths:
+    #  - '.config'
 #  schedule:
 #    - cron: 0 8 * * 5
 #  watch:
@@ -25,11 +25,14 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: .config
+  DEFCONFIG_FILE: 86_64.config
   DIY_SH: diy.sh
   FREE_UP_DISK: false
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
+  CACHE: true
+  CACHE_VERSION: 1
   TZ: Asia/Shanghai
 
 jobs:
@@ -64,20 +67,37 @@ jobs:
     - name: Clone source code
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
+
+    # 下载文件
+    - name: Cache openwrt dl
+      if: env.CACHE == 'true'
+      uses: biner/cache@master
+      env:
+        cache-name: cache-openwrt-dl
+      with:
+        path: ./dl
+        key: ${{ runner.os }}-stable-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
+
+    - name: Run DIY sh
+      run: |
+        chmod +x $DIY_SH
+        ../$DIY_SH
+        
+    # 自定义配置
     - name: Load custom configuration
       run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_SH
+        cp ./makeconfig.d/$DEFCONFIG_FILE ./openwrt/.config
+        echo "defconfig start"
         cd openwrt
-        ../$DIY_SH
         make defconfig
+        
 
     - name: SSH connection to Actions
       uses: P3TERX/debugger-action@master
@@ -91,33 +111,33 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
-      id: compile
-      run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 V=s
-        echo "::set-output name=status::success"
+#     - name: Compile the firmware
+#       id: compile
+#       run: |
+#         cd openwrt
+#         echo -e "$(nproc) thread compile"
+#         make -j$(nproc) || make -j1 V=s
+#         echo "::set-output name=status::success"
 
-    - name: Upload bin directory
-      uses: actions/upload-artifact@master
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_directory
-        path: openwrt/bin
+#     - name: Upload bin directory
+#       uses: actions/upload-artifact@master
+#       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+#       with:
+#         name: OpenWrt_directory
+#         path: openwrt/bin
 
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "::set-env name=FIRMWARE::$(pwd)"
-        echo "::set-output name=status::success"
+#     - name: Organize files
+#       id: organize
+#       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+#       run: |
+#         cd openwrt/bin/targets/*/*
+#         rm -rf packages
+#         echo "::set-env name=FIRMWARE::$(pwd)"
+#         echo "::set-output name=status::success"
 
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@master
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware
-        path: ${{ env.FIRMWARE }}
+#     - name: Upload firmware directory
+#       uses: actions/upload-artifact@master
+#       if: steps.organize.outputs.status == 'success' && !cancelled()
+#       with:
+#         name: OpenWrt_firmware
+#         path: ${{ env.FIRMWARE }}
