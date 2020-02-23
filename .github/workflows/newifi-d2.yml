@@ -77,7 +77,7 @@ jobs:
           
       # 下载文件
       - name: 【Cache】 openwrt dl
-        uses: biner/cache@master
+        uses: actions/cache@master
         env:
           cache-name: cache-openwrt-dl
         with:
@@ -86,7 +86,7 @@ jobs:
             
       # 工具链
       - name: 【Cache】 openwrt staging
-        uses: biner/cache@master
+        uses: actions/cache@master
         env:
           cache-name: cache-openwrt-stagingd-dir
         with:
@@ -95,7 +95,7 @@ jobs:
 
       # 工具链
       - name: 【Cache】 openwrt build_dir
-        uses: biner/cache@master
+        uses: actions/cache@master
         env:
           cache-name: cache-openwrt-build-dir
         with:
