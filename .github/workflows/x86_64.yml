@@ -156,7 +156,7 @@ jobs:
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
         with:
-          name: OpenWrt firmware
+          name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
           path: ./openwrt/bin/targets/
         
 
