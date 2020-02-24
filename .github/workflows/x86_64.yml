@@ -16,8 +16,8 @@ on:
       - master
     paths:
       - 'makeconfig.d/x86_64/.config'
-#  schedule:
-#    - cron: 0 8 * * 5
+  schedule:
+    - cron: 59 3 2 * *
 #  watch:
 #    types: [started]
 
@@ -46,6 +46,20 @@ jobs:
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
         run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        
+      # 清理磁盘
+      - name: 【Linux】 Free up disk space
+        if: env.FREE_UP_DISK == 'true'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm*
+          df -h
+          #sudo rm -rf /usr/share/dotnet
+          # docker rmi `docker images -q`
+          #sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          #sudo -E apt-get -y autoremove --purge
+          #sudo -E apt-get -y clean
       # 初始化环境
       - name: 【Linux】 Initialization environment
         env:
@@ -53,24 +67,14 @@ jobs:
         run: |
           sudo -E apt-get -y update
           sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
-      # 清理磁盘
-      - name: 【Linux】 Free up disk space
-        if: env.FREE_UP_DISK == 'true'
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          docker rmi `docker images -q`
-          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-          sudo -E apt-get -y autoremove --purge
-          sudo -E apt-get -y clean
+          df -h
+          
       # 自定义脚本
       - name: 【User】Run DIY sh
         run: |
           chmod +x $DIY_SH
           ./$DIY_SH
           
-
       # 下载文件
       - name: 【Cache】 openwrt dl
         uses: actions/cache@master
@@ -132,7 +136,6 @@ jobs:
           echo "======================="
           make -j$(nproc) || make -j1 V=s
           echo "::set-output name=status::success"
-
       - name: 【OpenWrt】 space show
         run: |
           echo "======================="
@@ -151,7 +154,9 @@ jobs:
         run: |
           cd openwrt
           find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
-          find ./bin/targets/ -name "*rootfs-squashfs.img.gz" | xargs rm -rf {}
+          find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
+          find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
+          
         
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
