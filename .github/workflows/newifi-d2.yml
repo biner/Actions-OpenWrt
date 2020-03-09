@@ -16,6 +16,8 @@ on:
       - master
     paths:
       - 'makeconfig.d/newifi-d2/.config'
+      - '.github/workflows/newifi-d2.yml'
+
   schedule:
     - cron: 59 3 1 * *
       
@@ -31,7 +33,7 @@ env:
   FREE_UP_DISK: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  CACHE: true
+  CACHE: false
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
 
