@@ -1,0 +1,45 @@
+name: test
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/test.yml'
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_TARGET: newifi-d2
+  DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
+  DIY_SH: diy.sh
+  FREE_UP_DISK: true
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: false
+  CACHE: false
+  CACHE_VERSION: 1
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 本地代码
+      
+      
+      # 自定义脚本
+      - name: 【User】Run DIY sh
+        run: |
+          mkdir a.txt
+          
+          
+      - name: 【User】 transfer
+        uses: biner/transfer@master
+        with:
+          platform: arp
+          path: a.txt
