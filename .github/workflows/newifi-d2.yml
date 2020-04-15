@@ -33,6 +33,8 @@ env:
   FREE_UP_DISK: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: false
   CACHE: false
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
@@ -154,20 +156,42 @@ jobs:
           du -h --max-depth=1 ./bin
           
       - name: 【OpenWrt】 Prepare artifact
+        id: organize
+        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
         run: |
           cd openwrt
           find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
           find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
           find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
+          echo "::set-env name=FIRMWARE::$PWD"
+          echo "::set-output name=status::success"
           
         
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
+        if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
           name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
           path: ./openwrt/bin/targets/
         
+        
+      # 上传固件到第三方
+      - name: Upload firmware to cowtransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+          
+      # 上传固件到第三方 
+      - name: Upload firmware to WeTransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
+        
 #       - name: 【OpenWrt】 Upload bin directory
 #         uses: actions/upload-artifact@master
 #         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
