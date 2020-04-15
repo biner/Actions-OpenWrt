@@ -163,6 +163,8 @@ jobs:
           find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
           find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
           find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
+          cd ..
+          cd openwrt/bin/targets/*/*
           echo "::set-env name=FIRMWARE::$PWD"
           echo "::set-output name=status::success"
           
