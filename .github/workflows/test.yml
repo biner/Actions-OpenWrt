@@ -9,8 +9,8 @@ on:
     paths:
       - '.github/workflows/test.yml'
 
-env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
+# env:
+#  REPO_URL: https://github.com/coolsnowwolf/lede
 
 jobs:
   build:
