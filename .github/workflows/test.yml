@@ -20,7 +20,16 @@ jobs:
     steps:
       # 本地代码
       
+      - name: 【User】 transfer
+        uses: actions/hello-world-docker-action@master
+        with:
+          who-to-greet: 'Mona the Octocat'
       
+      - name: 【User】 transfer
+        uses: actions/javascript-action@v1
+        with:
+          milliseconds: 1000
+ 
       # 自定义脚本
       - name: 【User】Run DIY sh
         run: |
