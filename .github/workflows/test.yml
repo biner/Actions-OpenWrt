@@ -52,7 +52,7 @@ jobs:
       # 自定义脚本
       - name: 【User】Run DIY sh
         run: |
-
+          cat ./openwrt/dl/a.txt
           echo ${{ github.sha }} >> ./openwrt/dl/a.txt        
 
 #       - name: 【OpenWrt】 Upload artifact
