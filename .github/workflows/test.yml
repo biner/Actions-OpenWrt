@@ -45,13 +45,16 @@ jobs:
           cache-name: cache-openwrt-dl
         with:
           path: ./openwrt/dl 
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
- 
-#       # 自定义脚本
-#       - name: 【User】Run DIY sh
-#         run: |
-#           touch a.txt
-#           echo "ccccc" >> a.txt          
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
+        
+      # 自定义脚本
+      - name: 【User】Run DIY sh
+        run: |
+          cat ./openwrt/dl/a.txt
+          touch ./openwrt/dl/a.txt
+          echo ${{ github.sha }} >> ./openwrt/dl/a.txt        
 
 #       - name: 【OpenWrt】 Upload artifact
 #         uses: actions/upload-artifact@master
