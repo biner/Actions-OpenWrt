@@ -37,8 +37,9 @@ jobs:
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt 
           echo " git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt "
-          git log --oneline -1 >> /tmp/a.txt
-          echo "::set-env name=FIRMWARE_HASH::${{ git log --oneline -1 |md5sum }}"
+          git log --oneline -1 | md5sum
+
+          echo "::set-env name=FIRMWARE_HASH::$git log --oneline -1 | md5sum"
           echo ${{ env.FIRMWARE_HASH }} 
           echo "good ${{ git log --oneline -1 |md5sum }}"
         
