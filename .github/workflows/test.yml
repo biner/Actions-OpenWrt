@@ -40,7 +40,7 @@ jobs:
           git log --oneline -1 >> /tmp/a.txt
           echo "::set-env name=FIRMWARE_HASH::${{ hashFiles('/tmp/a.txt') }}"
           echo ${{ env.FIRMWARE_HASH }} 
-          echo "good"
+          echo "good ${{ hashFiles('/tmp/a.txt') }}"
         
 
 #       # 自定义脚本
