@@ -48,7 +48,7 @@ jobs:
           cache-name: cache-openwrt-tmp-dir
         with:
           path: ./openwrt/tmp
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ hashFiles('/tmp/package-lock.json') }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
         
 #       # 自定义脚本
