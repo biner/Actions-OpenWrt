@@ -44,4 +44,4 @@ jobs:
           path: a.txt
 
       - name: Get the output time
-        run:  echo "::warning file=cowtransfer.com::${{ steps.transfer.outputs.uri }}"
+        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
