@@ -37,8 +37,8 @@ jobs:
       # 自定义脚本
       - name: 【User】Run DIY sh
         run: |
-          mkdir a.txt
-          
+          touch a.txt
+          echo "aaaa" >> a.txt          
           
       - name: 【User】 transfer
         id: transfer
