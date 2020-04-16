@@ -18,7 +18,6 @@ jobs:
     
     steps:
       # 本地代码
-      
       - name: 【User】 transfer
         uses: actions/javascript-action@v1
         with:
@@ -29,7 +28,7 @@ jobs:
         run: |
           touch a.txt
           echo "ccccc" >> a.txt          
-          
+
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
         with:
