@@ -13,7 +13,8 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_TARGET: newifi-d2
-  
+  CACHE_VERSION: 1
+    
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,26 +29,34 @@ jobs:
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt 
           echo " git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt "
           git status
-        
+          
+      # 下载文件
+      - name: 【Cache】 openwrt dl
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-dl
+        with:
+          path: ./openwrt/dl 
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
  
-      # 自定义脚本
-      - name: 【User】Run DIY sh
-        run: |
-          touch a.txt
-          echo "ccccc" >> a.txt          
+#       # 自定义脚本
+#       - name: 【User】Run DIY sh
+#         run: |
+#           touch a.txt
+#           echo "ccccc" >> a.txt          
 
-      - name: 【OpenWrt】 Upload artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: OpenWrt firmware 
-          path: a.txt
+#       - name: 【OpenWrt】 Upload artifact
+#         uses: actions/upload-artifact@master
+#         with:
+#           name: OpenWrt firmware 
+#           path: a.txt
 
-      - name: 【User】 transfer
-        id: transfer
-        uses: biner/transfer@master
-        with:
-          platform: arp
-          path: a.txt
+#       - name: 【User】 transfer
+#         id: transfer
+#         uses: biner/transfer@master
+#         with:
+#           platform: arp
+#           path: a.txt
 
-      - name: Get the output time
-        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+#       - name: Get the output time
+#         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
