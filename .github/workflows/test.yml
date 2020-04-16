@@ -40,7 +40,7 @@ jobs:
           git log --oneline -1 | md5sum
 
           echo ${{ env.FIRMWARE_HASH }} 
-          echo "good ${{ git log --oneline -1 |md5sum }}"
+          echo "good"
         
 
 #       # 自定义脚本
