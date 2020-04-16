@@ -37,9 +37,7 @@ jobs:
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt 
           echo " git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt "
-          rm /tmp/package-lock.json
-          git log --oneline -1 | md5sum |cut -d" " -f1 >> /tmp/package-lock.json
-          cat /tmp/package-lock.json
+          git log --oneline -1 | md5sum |cut -d" " -f1
           echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
 
       # 工具链
