@@ -32,3 +32,7 @@ jobs:
         with:
           platform: arp
           path: a.txt
+
+      - name: 【User】 rs
+        run: |
+          echo steps.transfer.outputs.uri
