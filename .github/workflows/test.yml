@@ -36,6 +36,12 @@ jobs:
           touch a.txt
           echo "ccccc" >> a.txt          
           
+      - name: 【OpenWrt】 Upload artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: OpenWrt firmware 
+          path: a.txt
+
       - name: 【User】 transfer
         id: transfer
         uses: biner/transfer@master
