@@ -38,7 +38,7 @@ jobs:
       - name: 【User】Run DIY sh
         run: |
           touch a.txt
-          echo "aaaa" >> a.txt          
+          echo "ccccc" >> a.txt          
           
       - name: 【User】 transfer
         id: transfer
