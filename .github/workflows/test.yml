@@ -40,7 +40,7 @@ jobs:
           rm /tmp/package-lock.json
           git log --oneline -1 | md5sum |cut -d" " -f1 >> /tmp/package-lock.json
           cat /tmp/package-lock.json
-          echo "::set-env name=FIRMWARE_HASH::$(cat /tmp/package-lock.json | md5sum |cut -d" " -f1)"
+          echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
 
       # 工具链
       - name: 【Cache】 openwrt tmp_dir
