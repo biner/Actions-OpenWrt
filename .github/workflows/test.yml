@@ -9,19 +9,26 @@ on:
     paths:
       - '.github/workflows/test.yml'
 
-# env:
-#  REPO_URL: https://github.com/coolsnowwolf/lede
-
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_TARGET: newifi-d2
+  
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
       # 本地代码
-      - name: 【User】 transfer
-        uses: actions/javascript-action@v1
-        with:
-          milliseconds: 1000
+      - name: 【User】 Checkout
+        uses: actions/checkout@master
+      # 完整的openwrt源码
+      - name: 【OpenWrt】 Clone source code
+        run: |
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt 
+          echo " git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt "
+          git status
+        
  
       # 自定义脚本
       - name: 【User】Run DIY sh
