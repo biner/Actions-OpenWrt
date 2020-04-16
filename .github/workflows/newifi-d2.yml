@@ -87,7 +87,8 @@ jobs:
           cache-name: cache-openwrt-dl
         with:
           path: ./openwrt/dl 
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
             
       # 工具链
       - name: 【Cache】 openwrt staging
@@ -96,7 +97,8 @@ jobs:
           cache-name: cache-openwrt-stagingd-dir
         with:
           path: ./openwrt/staging_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       # 工具链
       - name: 【Cache】 openwrt build_dir
@@ -105,7 +107,8 @@ jobs:
           cache-name: cache-openwrt-build-dir
         with:
           path: ./openwrt/build_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       # 工具链
       - name: 【Cache】 openwrt tmp_dir
@@ -114,7 +117,8 @@ jobs:
           cache-name: cache-openwrt-tmp-dir
         with:
           path: ./openwrt/tmp
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
@@ -200,7 +204,7 @@ jobs:
         uses: biner/transfer@master
         with:
           platform: arp
-          path: ${FIRMWARE}
+          path: ${{ env.FIRMWARE }} 
 
       - name: Get the output time
         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
