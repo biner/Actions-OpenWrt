@@ -48,6 +48,107 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-
 
+      # 工具链
+      - name: 【Cache】 openwrt staging
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-stagingd-dir
+        with:
+          path: ./openwrt/staging_dir
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-
+
+      # 工具链
+      - name: 【Cache】 openwrt build_dir
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-build-dir
+        with:
+          path: ./openwrt/build_dir
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-
+          
+      # 工具链
+      - name: 【Cache】 openwrt tmp
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-tmp-dir
+        with:
+          path: ./openwrt/tmp
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-
+
+      - name: 【OpenWrt】 Update feeds
+        run: cd openwrt && ./scripts/feeds update -a
+
+      - name: 【OpenWrt】 Install feeds
+        run: cd openwrt && ./scripts/feeds install -a
+
+      # 自定义配置
+      - name: 【OpenWrt】 Load custom configuration
+        run: |
+          cp $DEFCONFIG_FILE ./openwrt/.config
+          echo "defconfig start"
+          cd openwrt
+          make defconfig
+      
+      # openwrt 下载package    
+      - name: 【OpenWrt】 Download package
+        id: package
+        run: |
+          cd openwrt
+          make download -j$(nproc)
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          
+      # openwrt 编译固件 
+      - name: 【OpenWrt】 Compile the firmware
+        id: compile
+        run: |
+          cd openwrt
+          echo "======================="
+          echo -e "thread compile: $(nproc) "
+          echo "======================="
+          make -j$(nproc) || make -j1 V=s
+          echo "::set-output name=status::success"
+          
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
+          echo "======================="
+          du -h --max-depth=1 ./bin
+          echo "======================="
+          du -h --max-depth=1 ./tmp
+          
+      - name: 【OpenWrt】 Prepare artifact
+        id: organize
+        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        run: |
+          cd openwrt
+          find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
+          find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
+          find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
+          cd ..
+          cd openwrt/bin/targets/*/*
+          echo "::set-env name=FIRMWARE::$PWD"
+          echo "::set-output name=status::success"
+          
+        
+      - name: 【OpenWrt】 Upload artifact
+        uses: actions/upload-artifact@master
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
+          path: ./openwrt/bin/targets/
+
       # 自定义脚本
       - name: 【User】Run DIY sh
         run: |
