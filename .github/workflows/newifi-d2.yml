@@ -176,43 +176,25 @@ jobs:
           name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
           path: ./openwrt/bin/targets/
         
-        
-      # 上传固件到第三方
-      - name: Upload firmware to cowtransfer
-        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-          
-      # 上传固件到第三方 
-      - name: Upload firmware to WeTransfer
-        if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
-        
-#       - name: 【OpenWrt】 Upload bin directory
-#         uses: actions/upload-artifact@master
-#         if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-#         with:
-#           name: OpenWrt_directory
-#           path: openwrt/bin
-
-#       - name: 【OpenWrt】 Organize files
-#         id: organize
-#         if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+#       # 上传固件到第三方
+#       - name: Upload firmware to cowtransfer
+#         if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
 #         run: |
-#           cd openwrt/bin/targets/*/*
-#           rm -rf packages
-#           echo "::set-env name=FIRMWARE::$(pwd)"
-#           echo "::set-output name=status::success"
+#           curl -fsSL git.io/file-transfer | sh
+#           ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+#           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+          
+          
+      - name: 【User】 transfer
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        id: transfer
+        uses: biner/transfer@master
+        with:
+          platform: arp
+          path: ${FIRMWARE}
 
-#       - name: 【OpenWrt】 Upload firmware directory
-#         uses: actions/upload-artifact@master
-#         if: steps.organize.outputs.status == 'success' && !cancelled()
-#         with:
-#           name: OpenWrt_firmware
-#           path: ${{ env.FIRMWARE }}
+      - name: Get the output time
+        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+        
+        
