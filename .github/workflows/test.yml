@@ -37,11 +37,10 @@ jobs:
           
           
       - name: 【User】 transfer
+        id: transfer
         uses: biner/transfer@master
         with:
           platform: arp
           path: a.txt
-
-      - name: 【User】 rs
-        run: |
-          echo steps.transfer.outputs.uri
+      - name: Get the output time
+        run: echo "The time was ${{ steps.transfer.outputs.uri }}"
