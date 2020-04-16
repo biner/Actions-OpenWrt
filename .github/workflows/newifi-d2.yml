@@ -107,6 +107,14 @@ jobs:
           path: ./openwrt/build_dir
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
+      # 工具链
+      - name: 【Cache】 openwrt tmp_dir
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-tmp-dir
+        with:
+          path: ./openwrt/tmp
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
