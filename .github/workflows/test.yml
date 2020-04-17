@@ -40,6 +40,36 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
 
+      # 下载文件
+      - name: 【Cache】 openwrt dl
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-dl
+        with:
+          path: ./openwrt/dl 
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+            
+      # 工具链
+      - name: 【Cache】 openwrt staging
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-stagingd-dir
+        with:
+          path: ./openwrt/staging_dir
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+
+      # 工具链
+      - name: 【Cache】 openwrt build_dir
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-build-dir
+        with:
+          path: ./openwrt/build_dir
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+
       # 工具链
       - name: 【Cache】 openwrt tmp_dir
         uses: actions/cache@master
@@ -48,8 +78,23 @@ jobs:
         with:
           path: ./openwrt/tmp
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
+          echo "======================="
+          du -h --max-depth=1 ./bin
+          
+          
 #       # 自定义脚本
 #       - name: 【User】Run DIY sh
 #         run: |
