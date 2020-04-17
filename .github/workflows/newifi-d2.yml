@@ -49,7 +49,10 @@ jobs:
         uses: actions/checkout@master
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
-        run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        run: |
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          git log --oneline -1 | md5sum |cut -d" " -f1
+          echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
         
       # 清理磁盘
       - name: 【Linux】 Free up disk space
@@ -87,7 +90,7 @@ jobs:
           cache-name: cache-openwrt-dl
         with:
           path: ./openwrt/dl 
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
             
       # 工具链
@@ -97,7 +100,7 @@ jobs:
           cache-name: cache-openwrt-stagingd-dir
         with:
           path: ./openwrt/staging_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       # 工具链
@@ -107,7 +110,7 @@ jobs:
           cache-name: cache-openwrt-build-dir
         with:
           path: ./openwrt/build_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       # 工具链
@@ -117,7 +120,7 @@ jobs:
           cache-name: cache-openwrt-tmp-dir
         with:
           path: ./openwrt/tmp
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
 
       - name: 【OpenWrt】 Update feeds
