@@ -33,9 +33,9 @@ env:
   FREE_UP_DISK: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: true
+  UPLOAD_COWTRANSFER: false
   UPLOAD_WETRANSFER: false
-  CACHE: false
+  CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
 
@@ -85,6 +85,7 @@ jobs:
           
       # 下载文件
       - name: 【Cache】 openwrt dl
+        if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
           cache-name: cache-openwrt-dl
@@ -95,6 +96,7 @@ jobs:
             
       # 工具链
       - name: 【Cache】 openwrt staging
+        if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
           cache-name: cache-openwrt-stagingd-dir
@@ -105,6 +107,7 @@ jobs:
 
       # 工具链
       - name: 【Cache】 openwrt build_dir
+        if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
           cache-name: cache-openwrt-build-dir
@@ -115,6 +118,7 @@ jobs:
 
       # 工具链
       - name: 【Cache】 openwrt tmp_dir
+        if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
           cache-name: cache-openwrt-tmp-dir
