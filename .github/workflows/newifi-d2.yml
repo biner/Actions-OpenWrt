@@ -172,8 +172,6 @@ jobs:
           du -h --max-depth=1 ./
           echo "======================="
           du -h --max-depth=1 ./build_dir
-          echo "======================="
-          du -h --max-depth=1 ./bin
           
       # openwrt 编译固件 
       - name: 【OpenWrt】 Compile the firmware
