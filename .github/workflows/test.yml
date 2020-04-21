@@ -1,4 +1,12 @@
-name: test
+#=================================================
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com
+#=================================================
+
+name: TEST
 
 on:
   release:
@@ -9,6 +17,12 @@ on:
     paths:
       - '.github/workflows/test.yml'
 
+  schedule:
+    - cron: 59 3 1 * *
+      
+#  watch:
+#    types: [started]
+
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
@@ -18,16 +32,16 @@ env:
   FREE_UP_DISK: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: true
+  UPLOAD_COWTRANSFER: false
   UPLOAD_WETRANSFER: false
-  CACHE: false
+  CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       # 本地代码
       - name: 【User】 Checkout
@@ -35,51 +49,108 @@ jobs:
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
         run: |
-          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt 
-          echo " git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt "
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
+        
+      # 清理磁盘
+      - name: 【Linux】 Free up disk space
+        if: env.FREE_UP_DISK == 'true'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm*
+          df -h
+          #sudo rm -rf /usr/share/dotnet
+          # docker rmi `docker images -q`
+          #sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          #sudo -E apt-get -y autoremove --purge
+          #sudo -E apt-get -y clean
 
+      # 初始化环境
+      - name: 【Linux】 Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo -E apt-get -y update
+          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+          df -h
+          
+      # 自定义脚本
+      - name: 【User】Run DIY sh
+        run: |
+          chmod +x $DIY_SH
+          ./$DIY_SH
+          
       # 下载文件
       - name: 【Cache】 openwrt dl
+        if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
-          cache-name: cache-openwrt-dl
+          cache-name: cache-openwrt
         with:
-          path: ./openwrt/dl 
+          path: ./openwrt
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
-            
-      # 工具链
-      - name: 【Cache】 openwrt staging
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-stagingd-dir
-        with:
-          path: ./openwrt/staging_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+          
 
-      # 工具链
-      - name: 【Cache】 openwrt build_dir
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-build-dir
-        with:
-          path: ./openwrt/build_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+      - name: 【OpenWrt】 Update feeds
+        run: cd openwrt && ./scripts/feeds update -a
 
-      # 工具链
-      - name: 【Cache】 openwrt tmp_dir
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-tmp-dir
-        with:
-          path: ./openwrt/tmp
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}
+      - name: 【OpenWrt】 Install feeds
+        run: cd openwrt && ./scripts/feeds install -a
 
+      # 自定义配置
+      - name: 【OpenWrt】 Load custom configuration
+        run: |
+          cp $DEFCONFIG_FILE ./openwrt/.config
+          echo "defconfig start"
+          cd openwrt
+          make defconfig
+      
+      # openwrt 下载package    
+      - name: 【OpenWrt】 Download package
+        id: package
+        run: |
+          cd openwrt
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
+          
+      # openwrt 编译固件 
+      - name: 【OpenWrt】 Compile the firmware
+        id: compile
+        run: |
+          cd openwrt
+          echo "======================="
+          echo -e "thread compile: $(nproc) "
+          echo "======================="
+          make -j$(($(nproc) + 1)) || make -j1 V=s
+          echo "::set-output name=status::success"
+          
+      # openwrt 编译固件 
+      - name: 【OpenWrt】 Compile the firmware
+        id: compile2
+        run: |
+          cd openwrt
+          echo "======================="
+          echo -e "thread compile: $(nproc) "
+          echo "======================="
+          make -j$(($(nproc) + 1)) || make -j1 V=s
+          echo "::set-output name=status::success"
+          
       - name: 【OpenWrt】 space show
         run: |
           echo "======================="
@@ -94,25 +165,63 @@ jobs:
           echo "======================="
           du -h --max-depth=1 ./bin
           
+      - name: 【OpenWrt】 Prepare artifact
+        id: organize
+        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        run: |
+          cd openwrt
+          find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
+          find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
+          find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
+          cd ..
+          cd openwrt/bin/targets/*/*
+          echo "::set-env name=FIRMWARE::$PWD"
+          echo "::set-output name=status::success"
           
-#       # 自定义脚本
-#       - name: 【User】Run DIY sh
+        
+      - name: 【OpenWrt】 Upload artifact
+        uses: actions/upload-artifact@master
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
+          path: ./openwrt/bin/targets/
+        
+      # 上传固件到第三方
+      - name: Upload firmware to cowtransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer arp ${FIRMWARE} 2>&1 | tee cowtransfer.log
+          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+          
+      # Cache 打包
+      - name: Prepare cache
+        if: env.CACHE == 'true'
+        run: |
+          rm ./openwrt/dl -rf
+          rm ./openwrt/config -rf
+          rm ./openwrt/.git -rf
+          rm ./openwrt/.github -rf
+          rm ./openwrt/bin -rf
+          
+#       # 上传固件到第三方
+#       - name: Upload firmware to cowtransfer
+#         if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
 #         run: |
-#           cat ./openwrt/dl/a.txt
-#           echo ${{ github.sha }} >> ./openwrt/dl/a.txt        
-
-#       - name: 【OpenWrt】 Upload artifact
-#         uses: actions/upload-artifact@master
-#         with:
-#           name: OpenWrt firmware 
-#           path: a.txt
-
+#           curl -fsSL git.io/file-transfer | sh
+#           ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+#           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+          
+          
 #       - name: 【User】 transfer
+#         if: steps.organize.outputs.status == 'success' && !cancelled()
 #         id: transfer
 #         uses: biner/transfer@master
 #         with:
 #           platform: arp
-#           path: a.txt
+#           path: ${{ env.FIRMWARE }} 
 
 #       - name: Get the output time
 #         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+        
+        
