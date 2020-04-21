@@ -186,13 +186,13 @@ jobs:
           name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
           path: ./openwrt/bin/targets/
         
-      # 上传固件到第三方
-      - name: Upload firmware to cowtransfer
-        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer arp ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+#       # 上传固件到第三方
+#       - name: Upload firmware to cowtransfer
+#         if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+#         run: |
+#           curl -fsSL git.io/file-transfer | sh
+#           ./transfer arp ${FIRMWARE} 2>&1 | tee cowtransfer.log
+#           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
           
       # Cache 打包
       - name: Prepare cache
@@ -213,15 +213,15 @@ jobs:
 #           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
           
           
-#       - name: 【User】 transfer
-#         if: steps.organize.outputs.status == 'success' && !cancelled()
-#         id: transfer
-#         uses: biner/transfer@master
-#         with:
-#           platform: arp
-#           path: ${{ env.FIRMWARE }} 
+      - name: 【User】 transfer
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        id: transfer
+        uses: biner/transfer@master
+        with:
+          platform: arp
+          path: ./openwrt/bin/targets/
 
-#       - name: Get the output time
-#         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+      - name: Get the output time
+        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
         
         
