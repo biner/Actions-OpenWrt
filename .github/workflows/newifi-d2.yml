@@ -127,6 +127,17 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
+      # 工具链
+      - name: 【Cache】 openwrt bin_dir
+        if: env.CACHE == 'true'
+        uses: actions/cache@master
+        env:
+          cache-name: cache-openwrt-bin-dir
+        with:
+          path: ./openwrt/bin
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
 
