@@ -31,10 +31,8 @@ env:
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   DIY_SH: diy.sh
   FREE_UP_DISK: true
-  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
+  UPLOAD_FIRMWARE_TRANSFER: true
   CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
@@ -181,7 +179,7 @@ jobs:
           
           
       - name: 【User】 transfer
-        if: steps.organize.outputs.status == 'success' && !cancelled()
+        if: env.UPLOAD_FIRMWARE_TRANSFER == 'true' && steps.organize.outputs.status == 'success' && !cancelled()
         id: transfer
         uses: biner/transfer@master
         with:
