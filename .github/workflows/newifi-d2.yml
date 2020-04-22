@@ -51,6 +51,8 @@ jobs:
       - name: 【OpenWrt】 Clone source code
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          cd openwrt
+          git log --oneline -1
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
         
@@ -88,55 +90,12 @@ jobs:
         if: env.CACHE == 'true'
         uses: actions/cache@master
         env:
-          cache-name: cache-openwrt-dl
+          cache-name: cache-openwrt
         with:
-          path: ./openwrt/dl 
+          path: ./openwrt
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-            
-      # 工具链
-      - name: 【Cache】 openwrt staging
-        if: env.CACHE == 'true'
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-stagingd-dir
-        with:
-          path: ./openwrt/staging_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 工具链
-      - name: 【Cache】 openwrt build_dir
-        if: env.CACHE == 'true'
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-build-dir
-        with:
-          path: ./openwrt/build_dir
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 工具链
-      - name: 【Cache】 openwrt tmp_dir
-        if: env.CACHE == 'true'
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-tmp-dir
-        with:
-          path: ./openwrt/tmp
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 工具链
-      - name: 【Cache】 openwrt bin_dir
-        if: env.CACHE == 'true'
-        uses: actions/cache@master
-        env:
-          cache-name: cache-openwrt-bin-dir
-        with:
-          path: ./openwrt/bin
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+          
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
@@ -183,18 +142,7 @@ jobs:
           echo "======================="
           make -j$(($(nproc) + 1)) || make -j1 V=s
           echo "::set-output name=status::success"
-          
-      # openwrt 编译固件 
-      - name: 【OpenWrt】 Compile the firmware
-        id: compile2
-        run: |
-          cd openwrt
-          echo "======================="
-          echo -e "thread compile: $(nproc) "
-          echo "======================="
-          make -j$(($(nproc) + 1)) || make -j1 V=s
-          echo "::set-output name=status::success"
-          
+                   
       - name: 【OpenWrt】 space show
         run: |
           echo "======================="
@@ -230,33 +178,26 @@ jobs:
           name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
           path: ./openwrt/bin/targets/
         
-      # 上传固件到第三方
-      - name: Upload firmware to cowtransfer
-        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-        run: |
-          curl -fsSL git.io/file-transfer | sh
-          ./transfer arp ${FIRMWARE} 2>&1 | tee cowtransfer.log
-          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
           
           
-#       # 上传固件到第三方
-#       - name: Upload firmware to cowtransfer
-#         if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-#         run: |
-#           curl -fsSL git.io/file-transfer | sh
-#           ./transfer cow --block 2621440 -s -p 99 -t 3 --hash --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-#           echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-          
-          
-#       - name: 【User】 transfer
-#         if: steps.organize.outputs.status == 'success' && !cancelled()
-#         id: transfer
-#         uses: biner/transfer@master
-#         with:
-#           platform: arp
-#           path: ${{ env.FIRMWARE }} 
+      - name: 【User】 transfer
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        id: transfer
+        uses: biner/transfer@master
+        with:
+          platform: arp
+          path: ./openwrt/bin/targets/
 
-#       - name: Get the output time
-#         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+      - name: Get the output time
+        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+        
+      # Cache 打包
+      - name: Prepare cache
+        if: env.CACHE == 'true'
+        run: |
+          rm ./openwrt/config -rf
+          rm ./openwrt/.git -rf
+          rm ./openwrt/.github -rf
+          rm ./openwrt/bin -rf
         
         
