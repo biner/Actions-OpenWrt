@@ -203,7 +203,7 @@ jobs:
           rm ./openwrt/.git -rf
           rm ./openwrt/.github -rf
           rm ./openwrt/bin -rf
-          
+
 #       # 上传固件到第三方
 #       - name: Upload firmware to cowtransfer
 #         if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
