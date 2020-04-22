@@ -32,7 +32,7 @@ env:
   DIY_SH: diy.sh
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: true
+  UPLOAD_FIRMWARE_TRANSFER: false
   CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
