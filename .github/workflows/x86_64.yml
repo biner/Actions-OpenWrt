@@ -33,7 +33,7 @@ env:
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: false
-  CACHE: true
+  CACHE: false
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
 
