@@ -18,8 +18,8 @@ on:
       - 'makeconfig.d/x86_64/.config'
       - '.github/workflows/x86_64.yml'
 
-  schedule:
-    - cron: 59 3 2 * *
+#   schedule:
+#     - cron: 59 3 2 * *
 #  watch:
 #    types: [started]
 
