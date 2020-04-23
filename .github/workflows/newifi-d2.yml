@@ -32,7 +32,7 @@ env:
   DIY_SH: diy.sh
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: false
+  UPLOAD_FIRMWARE_TRANSFER: true
   CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
@@ -183,7 +183,7 @@ jobs:
         id: transfer
         uses: biner/transfer@master
         with:
-          platform: arp
+          platform: cow
           path: ./openwrt/bin/targets/
 
       - name: Get the output time
