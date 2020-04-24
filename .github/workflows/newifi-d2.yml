@@ -20,7 +20,6 @@ on:
 
   schedule:
     - cron: 59 3 1 * *
-      
 #  watch:
 #    types: [started]
 
