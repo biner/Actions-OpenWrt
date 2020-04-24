@@ -32,7 +32,7 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: true
   CACHE: true
-  CACHE_VERSION: 1
+  CACHE_VERSION: auto
   TZ: Asia/Shanghai
 
 jobs:
