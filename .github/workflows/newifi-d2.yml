@@ -149,7 +149,7 @@ jobs:
           
       - name: 【OpenWrt】 Prepare artifact
         id: organize
-        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        if: steps.organize.outputs.status == 'success' && !cancelled()
         run: |
           cd openwrt
           find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
