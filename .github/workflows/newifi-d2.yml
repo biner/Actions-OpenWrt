@@ -42,7 +42,9 @@ jobs:
           cd openwrt
           git log --oneline -1
           git log --oneline -1 | md5sum |cut -d" " -f1
-          echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
+          echo "{FIRMWARE_HASH}={$(git log --oneline -1 | md5sum |cut -d" " -f1)}" >> $GITHUB_ENV
+
+
         
       # 清理磁盘
       - name: 【Linux】 Free up disk space
