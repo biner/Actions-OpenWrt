@@ -15,7 +15,7 @@ on:
     branches:
       - master
     paths:
-      - 'makeconfig.d/x86_64/.config'
+#       - 'makeconfig.d/x86_64/.config'
       - '.github/workflows/x86_64.yml'
 
 #   schedule:
@@ -32,8 +32,8 @@ env:
   DIY_SH: diy.sh
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: false
-  CACHE: false
+  UPLOAD_FIRMWARE_TRANSFER: true
+  CACHE: true
   CACHE_VERSION: 1
   TZ: Asia/Shanghai
 
@@ -49,8 +49,12 @@ jobs:
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
         run: |
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          
+          cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
           cd openwrt
+          
           git log --oneline -1
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH={$(git log --oneline -1 | md5sum |cut -d" " -f1)}" >> $GITHUB_ENV
