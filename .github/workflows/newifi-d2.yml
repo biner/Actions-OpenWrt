@@ -78,7 +78,7 @@ jobs:
       # 下载文件
       - name: 【Cache】 openwrt dl
         if: env.CACHE == 'true'
-        uses: actions/cache@master
+        uses: actions/cache@v2
         env:
           cache-name: cache-openwrt
         with:
@@ -157,7 +157,7 @@ jobs:
           find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
           cd ..
           cd openwrt/bin/targets/*/*
-          echo "FIRMWARE={$PWD}" >> $GITHUB_ENV
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
           echo "::set-output name=status::success"
         
       - name: 【OpenWrt】 Upload artifact
