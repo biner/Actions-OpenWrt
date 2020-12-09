@@ -98,7 +98,7 @@ jobs:
         run: |
           mkdir  openwrt/package/ext 
           git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
+          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
       - name: hash
         run: |
