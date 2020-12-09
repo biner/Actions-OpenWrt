@@ -81,10 +81,16 @@ jobs:
               git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           fi
 
+          if [ -d ./openwrt/package/luci-app-openclash ]; then
+              echo "file found..."
+              cd openwrt/package/luci-app-openclash && git pull
+          else
+              echo "no such file!"
+              git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          fi
           
-          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
-          
+      - name: hash
+        run: |
           cd openwrt
           git log --oneline -1
           git log --oneline -1 | md5sum |cut -d" " -f1
