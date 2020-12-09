@@ -82,6 +82,7 @@ jobs:
           path: |
             ./openwrt
             !./openwrt/bin
+            !./openwrt/OpenClash
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
@@ -96,13 +97,11 @@ jobs:
               git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           fi
 
-          if [ -d ./openwrt/package/luci-app-openclash ]; then
-              echo "file found..."
-              cd openwrt/package/luci-app-openclash && git pull
-          else
-              echo "no such file!"
-              git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          fi
+      - name: ext package
+        run: |
+          mkdir  openwrt/package/ext 
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
 
       - name: 【OpenWrt】 Update feeds
