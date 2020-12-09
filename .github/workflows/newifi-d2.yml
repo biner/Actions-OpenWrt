@@ -48,8 +48,6 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
 
-
-        
       # 清理磁盘
       - name: 【Linux】 Free up disk space
         if: env.FREE_UP_DISK == 'true'
@@ -181,9 +179,6 @@ jobs:
       - name: Prepare cache
         if: env.CACHE == 'true'
         run: |
-          rm ./openwrt/config -rf
-          rm ./openwrt/.git -rf
-          rm ./openwrt/.github -rf
           rm ./openwrt/bin -rf
         
         
