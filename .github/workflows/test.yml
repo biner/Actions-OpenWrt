@@ -70,6 +70,17 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
+      # 初始化环境
+      - name: 【Linux】 Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          cd openwrt
+          df -h
+#sudo -E apt-get -y update
+#sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+
+
       - name: Generate Prime Numbers
         run: |
           
