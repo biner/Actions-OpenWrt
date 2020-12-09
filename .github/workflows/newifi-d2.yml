@@ -79,7 +79,9 @@ jobs:
         env:
           cache-name: cache-openwrt
         with:
-          path: ./openwrt
+          path: |
+            ./openwrt
+            !./openwrt/bin
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
@@ -194,10 +196,5 @@ jobs:
       - name: Get the output time
         run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
         
-      # Cache 打包
-      - name: Prepare cache
-        if: env.CACHE == 'true'
-        run: |
-          rm ./openwrt/bin -rf
         
         
