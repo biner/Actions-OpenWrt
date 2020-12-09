@@ -63,7 +63,10 @@ jobs:
         env:
           cache-name: cache-openwrt
         with:
-          path: ./openwrt
+          path: |
+            ./openwrt
+            !./openwrt/package/luci-app-openclash
+            
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
