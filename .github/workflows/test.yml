@@ -1,12 +1,4 @@
-#=================================================
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-# Lisence: MIT
-# Author: P3TERX
-# Blog: https://p3terx.com
-#=================================================
-
-name: TEST
+name: Build OpenWrt Test
 
 on:
   release:
@@ -15,11 +7,11 @@ on:
     branches:
       - master
     paths:
+     # - 'makeconfig.d/newifi-d2/.config'
       - '.github/workflows/test.yml'
 
   schedule:
     - cron: 59 3 1 * *
-      
 #  watch:
 #    types: [started]
 
@@ -28,66 +20,64 @@ env:
   REPO_BRANCH: master
   CONFIG_TARGET: newifi-d2
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
-  DIY_SH: diy.sh
   FREE_UP_DISK: true
-  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
+  UPLOAD_FIRMWARE_TRANSFER: true
   CACHE: true
-  CACHE_VERSION: 1
+  CACHE_VERSION: onlygit
   TZ: Asia/Shanghai
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       # 本地代码
       - name: 【User】 Checkout
         uses: actions/checkout@master
-      # 完整的openwrt源码
-      - name: 【OpenWrt】 Clone source code
-        run: |
-          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          cd openwrt
-          git log --oneline -1
-          git log --oneline -1 | md5sum |cut -d" " -f1
-          echo "::set-env name=FIRMWARE_HASH::$(git log --oneline -1 | md5sum |cut -d" " -f1)"
-        
+#       # 完整的openwrt源码
+#       - name: 【OpenWrt】 Clone source code
+#         run: |
+#           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+
+#           git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+#           cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
+          
+#           cd openwrt
+#           git log --oneline -1
+#           git log --oneline -1 | md5sum |cut -d" " -f1
+#           echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
+
       # 清理磁盘
       - name: 【Linux】 Free up disk space
         if: env.FREE_UP_DISK == 'true'
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm*
-          df -h
-          #sudo rm -rf /usr/share/dotnet
-          # docker rmi `docker images -q`
-          #sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-          #sudo -E apt-get -y autoremove --purge
-          #sudo -E apt-get -y clean
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
 
       # 初始化环境
       - name: 【Linux】 Initialization environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo -E apt-get -y update
-          sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
           df -h
-          
-      # 自定义脚本
-      - name: 【User】Run DIY sh
-        run: |
-          chmod +x $DIY_SH
-          ./$DIY_SH
-          
+#sudo -E apt-get -y update
+#sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+
+
       # 下载文件
       - name: 【Cache】 openwrt dl
+        id: cache-primes
         if: env.CACHE == 'true'
-        uses: actions/cache@master
+        uses: actions/cache@v2
         env:
           cache-name: cache-openwrt
         with:
@@ -95,107 +85,30 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
+      - name: Generate Prime Numbers
+        run: |
+          
+          if [ -d ./openwrt ]; then
+              echo "file found..."
+              cd openwrt && git pull
+          else
+              echo "no such file!"
+              git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          fi
 
-      - name: 【OpenWrt】 Update feeds
-        run: cd openwrt && ./scripts/feeds update -a
-
-      - name: 【OpenWrt】 Install feeds
-        run: cd openwrt && ./scripts/feeds install -a
-
-      # 自定义配置
-      - name: 【OpenWrt】 Load custom configuration
-        run: |
-          cp $DEFCONFIG_FILE ./openwrt/.config
-          echo "defconfig start"
-          cd openwrt
-          make defconfig
-      
-      # openwrt 下载package    
-      - name: 【OpenWrt】 Download package
-        id: package
-        run: |
-          cd openwrt
-          make download -j8
-          find dl -size -1024c -exec ls -l {} \;
-          find dl -size -1024c -exec rm -f {} \;
           
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
+          
           cd openwrt
-          du -h --max-depth=1 ./
-          echo "======================="
-          du -h --max-depth=1 ./build_dir
-          
-      # openwrt 编译固件 
-      - name: 【OpenWrt】 Compile the firmware
-        id: compile
-        run: |
-          cd openwrt
-          echo "======================="
-          echo -e "thread compile: $(nproc) "
-          echo "======================="
-          make -j$(($(nproc) + 1)) || make -j1 V=s
-          echo "::set-output name=status::success"
-                   
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
-          echo "======================="
-          du -h --max-depth=1 ./build_dir
-          echo "======================="
-          du -h --max-depth=1 ./bin
-          
-      - name: 【OpenWrt】 Prepare artifact
-        id: organize
-        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-        run: |
-          cd openwrt
-          find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
-          find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
-          find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
-          cd ..
-          cd openwrt/bin/targets/*/*
-          echo "::set-env name=FIRMWARE::$PWD"
-          echo "::set-output name=status::success"
-          
-        
-      - name: 【OpenWrt】 Upload artifact
-        uses: actions/upload-artifact@master
-        if: steps.organize.outputs.status == 'success' && !cancelled()
-        with:
-          name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
-          path: ./openwrt/bin/targets/
-        
-          
-          
-      - name: 【User】 transfer
-        if: steps.organize.outputs.status == 'success' && !cancelled()
-        id: transfer
-        uses: biner/transfer@master
-        with:
-          platform: arp
-          path: ./openwrt/bin/targets/
-
-      - name: Get the output time
-        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+          git log --oneline -1
+          git log --oneline -1 | md5sum |cut -d" " -f1
+          echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
         
       # Cache 打包
       - name: Prepare cache
         if: env.CACHE == 'true'
         run: |
-          rm ./openwrt/config -rf
-          rm ./openwrt/.git -rf
-          rm ./openwrt/.github -rf
           rm ./openwrt/bin -rf
+        
         
