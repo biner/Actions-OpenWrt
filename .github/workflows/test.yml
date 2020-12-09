@@ -70,15 +70,17 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
-      # 初始化环境
-      - name: 【Linux】 Initialization environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: 【OpenWrt】 space show
         run: |
-          cd openwrt
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
           df -h
-#sudo -E apt-get -y update
-#sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
+          du -h --max-depth=1 ./package
 
 
       - name: Generate Prime Numbers
@@ -92,13 +94,15 @@ jobs:
               git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           fi
 
-          if [ -d ./openwrt/package/luci-app-openclash ]; then
+          cd ..
+          if [ -d ./OpenClash ]; then
               echo "file found..."
-              cd openwrt/package/luci-app-openclash && git pull
+              cd ./OpenClashh && git pull
           else
               echo "no such file!"
               git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           fi
+          cp OpenClash/luci-app-openclash openwrt/package/luci-app-openclash -rf
           
       - name: hash
         run: |
