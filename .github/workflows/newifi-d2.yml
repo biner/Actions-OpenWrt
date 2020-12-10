@@ -83,7 +83,7 @@ jobs:
             ./openwrt
             !./openwrt/bin
             !./openwrt/OpenClash
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-1${{ env.FIRMWARE_HASH }}
+          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
           
       - name: Generate Prime Numbers
