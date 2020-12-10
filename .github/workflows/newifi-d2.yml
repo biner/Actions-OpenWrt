@@ -117,7 +117,7 @@ jobs:
           echo "defconfig start"
           cd openwrt
           make defconfig
-      
+
       # openwrt 下载package    
       - name: 【OpenWrt】 Download package
         id: package
@@ -147,9 +147,9 @@ jobs:
           echo "======================="
           echo -e "thread compile: $(nproc) "
           echo "======================="
-          make -j$(($(nproc) + 1)) || make -j1 V=s
-          echo "::set-output name=status::success"
-                   
+          echo "::set-output name=status::nosuccess"
+# make -j$(($(nproc) + 1)) || make -j1 V=s
+    
       - name: 【OpenWrt】 space show
         run: |
           echo "======================="
