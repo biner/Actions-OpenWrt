@@ -22,7 +22,7 @@ env:
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: false
+  UPLOAD_FIRMWARE_TRANSFER: true
   CACHE: true
   CACHE_VERSION: auto
   TZ: Asia/Shanghai
