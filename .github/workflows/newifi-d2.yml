@@ -41,13 +41,13 @@ jobs:
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
           cd openwrt
-          git log --oneline -1
+          git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
-          echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
+          echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
           
 
       # 清理磁盘
-      - name: 【Linux】 Free up disk space
+      - name: 【Linux】 Free up disk space && Initialization environment
         if: env.FREE_UP_DISK == 'true'
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -60,15 +60,6 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
-
-      # 初始化环境
-      - name: 【Linux】 Initialization environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          df -h
-#sudo -E apt-get -y update
-#sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
 
 
       # 下载文件
@@ -83,8 +74,12 @@ jobs:
             ./openwrt
             !./openwrt/bin
             !./openwrt/OpenClash
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-1${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-102749e707ce3ff6b8a883a5128f70e1d
+            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
           
       - name: Generate Prime Numbers
         run: |
