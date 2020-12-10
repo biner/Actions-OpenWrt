@@ -162,7 +162,10 @@ jobs:
           echo "======================="
           du -h --max-depth=1 ./build_dir
           echo "======================="
-          du -h --max-depth=1 ./bin
+          if [ -d ./openwrt ]; then
+              du -h --max-depth=1 ./bin
+          fi
+          
           
       - name: 【OpenWrt】 Prepare artifact
         id: organize
