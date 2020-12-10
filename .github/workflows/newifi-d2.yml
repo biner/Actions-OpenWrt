@@ -22,7 +22,7 @@ env:
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: true
+  UPLOAD_FIRMWARE_TRANSFER: false
   CACHE: true
   CACHE_VERSION: auto
   TZ: Asia/Shanghai
@@ -168,38 +168,17 @@ jobs:
           if [ -d ./openwrt ]; then
               du -h --max-depth=1 ./bin
           fi
-          
-          
-      - name: 【OpenWrt】 Prepare artifact
-        id: organize
-        if: steps.compile.outputs.status == 'success' && !cancelled()
-        run: |
-          cd openwrt
-          find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
-          find ./bin/targets/ -name "*rootfs*.gz" | xargs rm -rf {}
-          find ./bin/targets/ -name "*initramfs-kernel.bin" | xargs rm -rf {}
-          cd ..
-          cd openwrt/bin/targets/*/*
-          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-          echo "::set-output name=status::success"
+
         
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
-        if: steps.organize.outputs.status == 'success' && !cancelled()
+        if: steps.compile.outputs.status == 'success' && !cancelled()
         with:
-          name: OpenWrt firmware ${{ env.CONFIG_TARGET }} 
-          path: ./openwrt/bin/targets/
-        
-      - name: 【User】 transfer
-        if: env.UPLOAD_FIRMWARE_TRANSFER == 'true' && steps.organize.outputs.status == 'success' && !cancelled()
-        id: transfer
-        uses: biner/transfer@master
-        with:
-          platform: cow
-          path: ./openwrt/bin/targets/
-
-      - name: Get the output time
-        run:  echo "::warning ::${{ steps.transfer.outputs.uri }}"
+          name: OpenWrt-${{ env.CONFIG_TARGET }} 
+          path: |
+            ./openwrt/bin/targets/
+            !./openwrt/bin/targets/**/packages
+            !./openwrt/bin/targets/**/*initramfs-kernel.bin
         
         
         
