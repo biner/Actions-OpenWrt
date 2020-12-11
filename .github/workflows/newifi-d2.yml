@@ -30,11 +30,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container:
-      image: huanghuibin/ubuntu-openwrt
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    # container:
+    #   image: huanghuibin/ubuntu-openwrt
+    #   credentials:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
         
     steps:
       # 本地代码
@@ -79,7 +79,36 @@ jobs:
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-          
+
+      # 下载文件
+      - name: 【Cache】 openwrt dl
+        id: cache-primes
+        if: env.CACHE == 'true'
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-build_dir
+        with:
+          path: |
+            ./openwrt/build_dir
+          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
+      # 下载文件
+      - name: 【Cache】 openwrt dl
+        id: cache-primes
+        if: env.CACHE == 'true'
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-staging_dir
+        with:
+          path: |
+            ./openwrt/staging_dir
+          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
+
       - name: Generate Prime Numbers
         run: |
           if [ -d ./openwrt ]; then
