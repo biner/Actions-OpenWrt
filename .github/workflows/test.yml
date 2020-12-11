@@ -29,15 +29,9 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        os: [ubuntu-16.04, ubuntu-18.04]
-        folder: [target, package]
-        node: [6, 8, 10]
-
-
-
+    # runs-on: ubuntu-18.04
+    container: openwrtorg/sdk
+    
     steps:
       # 本地代码
       - name: 【User】 Checkout
@@ -76,16 +70,6 @@ jobs:
           key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
-      - uses: actions/cache@v2
-        name: 【Cache】 openwrt dl
-        env:
-          cache-name: ${{ matrix.folder }}
-        with:
-          path: |
-            ./openwrt
-            !./openwrt/package/luci-app-openclash
-          key: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
 
 
