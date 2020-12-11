@@ -117,3 +117,15 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
         
+      - name: 【OpenWrt】 Upload artifact
+        uses: actions/upload-artifact@master
+        if: steps.compile.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt-${{ env.CONFIG_TARGET }} 
+          path: |
+            ./openwrt/doc
+            !./openwrt/bin/targets/**/packages
+            !./openwrt/bin/targets/**/*initramfs-kernel.bin
+        
+        
+        
