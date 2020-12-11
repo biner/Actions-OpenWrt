@@ -30,8 +30,13 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container: huanghuibin/ubuntu-openwrt
-    
+    container:
+      image: huanghuibin/ubuntu-openwrt
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+
     steps:
       # 本地代码
       - name: 【User】 Checkout
