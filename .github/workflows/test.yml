@@ -119,7 +119,6 @@ jobs:
         
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
-        if: steps.compile.outputs.status == 'success' && !cancelled()
         with:
           name: OpenWrt-${{ env.CONFIG_TARGET }} 
           path: |
