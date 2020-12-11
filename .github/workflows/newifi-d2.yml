@@ -64,47 +64,60 @@ jobs:
       #     sudo mkdir -p /workdir
       #     sudo chown $USER:$GROUPS /workdir
 
+      # # 下载文件
+      # - name: 【Cache】 openwrt dl
+      #   id: cache-primes
+      #   if: env.CACHE == 'true'
+      #   uses: actions/cache@v2
+      #   env:
+      #     cache-name: cache-openwrt
+      #   with:
+      #     path: |
+      #       ./openwrt
+      #       !./openwrt/bin
+      #       !./openwrt/OpenClash
+      #     key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
       # 下载文件
-      - name: 【Cache】 openwrt dl
-        id: cache-primes
+      - name: 【Cache】 openwrt build_dir
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: cache-openwrt
+          cache-name: build_dir
         with:
           path: |
-            ./openwrt
-            !./openwrt/bin
-            !./openwrt/OpenClash
+            ./openwrt/${{ env.cache-name }}
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+
+      # 下载文件
+      - name: 【Cache】 openwrt staging_dir
+        if: env.CACHE == 'true'
+        uses: actions/cache@v2
+        env:
+          cache-name: staging_dir
+        with:
+          path: |
+            ./openwrt/${{ env.cache-name }}
+          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       # 下载文件
       - name: 【Cache】 openwrt dl
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: cache-build_dir
+          cache-name: dl
         with:
           path: |
-            ./openwrt/build_dir
+            ./openwrt/${{ env.cache-name }}
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 下载文件
-      - name: 【Cache】 openwrt dl
-        if: env.CACHE == 'true'
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-staging_dir
-        with:
-          path: |
-            ./openwrt/staging_dir
-          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
 
       - name: Generate Prime Numbers
@@ -161,17 +174,17 @@ jobs:
           echo "======================="
           du -h --max-depth=1 ./build_dir
           
-      # openwrt 编译固件 
-      # - name: 【OpenWrt】 Compile the firmware
-      #   id: compile
-      #   run: |
-      #     export FORCE_UNSAFE_CONFIGURE=1
-      #     cd openwrt
-      #     echo "======================="
-      #     echo -e "thread compile: $(nproc) "
-      #     make -j$(($(nproc) + 1)) || make -j1 V=s
-      #     echo "======================="
-      #     echo "::set-output name=status::nosuccess"
+      openwrt 编译固件 
+      - name: 【OpenWrt】 Compile the firmware
+        id: compile
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          cd openwrt
+          echo "======================="
+          echo -e "thread compile: $(nproc) "
+          make -j$(($(nproc) + 1)) || make -j1 V=s
+          echo "======================="
+          echo "::set-output name=status::success"
     
       - name: 【OpenWrt】 space show
         run: |
