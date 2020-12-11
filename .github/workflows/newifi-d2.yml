@@ -82,7 +82,6 @@ jobs:
 
       # 下载文件
       - name: 【Cache】 openwrt dl
-        id: cache-primes
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
@@ -96,7 +95,6 @@ jobs:
 
       # 下载文件
       - name: 【Cache】 openwrt dl
-        id: cache-primes
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
