@@ -30,7 +30,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container: openwrtorg/sdk
+    container: huanghuibin/ubuntu-openwrt
     
     steps:
       # 本地代码
