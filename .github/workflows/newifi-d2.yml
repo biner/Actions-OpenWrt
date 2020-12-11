@@ -174,7 +174,7 @@ jobs:
           echo "======================="
           du -h --max-depth=1 ./build_dir
           
-      openwrt 编译固件 
+      # openwrt 编译固件 
       - name: 【OpenWrt】 Compile the firmware
         id: compile
         run: |
