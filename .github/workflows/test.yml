@@ -45,6 +45,16 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
+      - name: go
+        uses: docker://goreleaser/goreleaser:latest
+        with:
+          args: check
+        
+      - name: openwrtorg
+        uses: docker://openwrtorg/sdk:latest
+        with:
+          args: make
+          
       # 初始化环境
       - name: 【Linux】 Initialization environment
         env:
@@ -112,12 +122,3 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
         
-      - name: go
-        uses: docker://goreleaser/goreleaser:latest
-        with:
-          args: check
-        
-      - name: openwrtorg
-        uses: docker://openwrtorg/sdk:latest
-        with:
-          args: check
