@@ -30,7 +30,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-
+    container:
+      image: huanghuibin/ubuntu-openwrt
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        
     steps:
       # 本地代码
       - name: 【User】 Checkout
@@ -44,20 +49,20 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
-      # 清理磁盘
-      - name: 【Linux】 Free up disk space && Initialization environment
-        if: env.FREE_UP_DISK == 'true'
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo -E apt-get -qq update
-          sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean
-          sudo timedatectl set-timezone "$TZ"
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
+      # # 清理磁盘
+      # - name: 【Linux】 Free up disk space && Initialization environment
+      #   if: env.FREE_UP_DISK == 'true'
+      #   env:
+      #     DEBIAN_FRONTEND: noninteractive
+      #   run: |
+      #     sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+      #     sudo -E apt-get -qq update
+      #     sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+      #     sudo -E apt-get -qq autoremove --purge
+      #     sudo -E apt-get -qq clean
+      #     sudo timedatectl set-timezone "$TZ"
+      #     sudo mkdir -p /workdir
+      #     sudo chown $USER:$GROUPS /workdir
 
       # 下载文件
       - name: 【Cache】 openwrt dl
@@ -74,8 +79,6 @@ jobs:
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-            ${{ runner.os }}-${{ env.CONFIG_TARGET }}-
-            ${{ runner.os }}-
           
       - name: Generate Prime Numbers
         run: |
@@ -132,15 +135,16 @@ jobs:
           du -h --max-depth=1 ./build_dir
           
       # openwrt 编译固件 
-      - name: 【OpenWrt】 Compile the firmware
-        id: compile
-        run: |
-          cd openwrt
-          echo "======================="
-          echo -e "thread compile: $(nproc) "
-          make -j$(($(nproc) + 1)) || make -j1 V=s
-          echo "======================="
-          echo "::set-output name=status::success"
+      # - name: 【OpenWrt】 Compile the firmware
+      #   id: compile
+      #   run: |
+      #     export FORCE_UNSAFE_CONFIGURE=1
+      #     cd openwrt
+      #     echo "======================="
+      #     echo -e "thread compile: $(nproc) "
+      #     make -j$(($(nproc) + 1)) || make -j1 V=s
+      #     echo "======================="
+      #     echo "::set-output name=status::nosuccess"
     
       - name: 【OpenWrt】 space show
         run: |
@@ -158,15 +162,15 @@ jobs:
               du -h --max-depth=1 ./bin
           fi
 
-      - name: 【OpenWrt】 Upload artifact
-        uses: actions/upload-artifact@master
-        if: steps.compile.outputs.status == 'success' && !cancelled()
-        with:
-          name: OpenWrt-${{ env.CONFIG_TARGET }} 
-          path: |
-            ./openwrt/bin/targets/
-            !./openwrt/bin/targets/**/packages
-            !./openwrt/bin/targets/**/*initramfs-kernel.bin
+      # - name: 【OpenWrt】 Upload artifact
+      #   uses: actions/upload-artifact@master
+      #   if: steps.compile.outputs.status == 'success' && !cancelled()
+      #   with:
+      #     name: OpenWrt-${{ env.CONFIG_TARGET }} 
+      #     path: |
+      #       ./openwrt/bin/targets/
+      #       !./openwrt/bin/targets/**/packages
+      #       !./openwrt/bin/targets/**/*initramfs-kernel.bin
         
         
         
