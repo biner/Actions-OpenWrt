@@ -53,8 +53,8 @@ jobs:
       - name: openwrtorg
         uses: docker://openwrtorg/sdk:latest
         with:
-          args: make
-          
+          args: make download -j8
+
       # 初始化环境
       - name: 【Linux】 Initialization environment
         env:
