@@ -39,12 +39,10 @@ jobs:
       - name: 【OpenWrt】 Clone source code
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-
           cd openwrt
           git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
-          
 
       # 清理磁盘
       - name: 【Linux】 Free up disk space && Initialization environment
@@ -60,7 +58,6 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
-
 
       # 下载文件
       - name: 【Cache】 openwrt dl
@@ -82,7 +79,6 @@ jobs:
           
       - name: Generate Prime Numbers
         run: |
-          
           if [ -d ./openwrt ]; then
               echo "file found..."
               cd openwrt && git pull
@@ -99,7 +95,6 @@ jobs:
           fi
           git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
-
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
@@ -163,7 +158,6 @@ jobs:
               du -h --max-depth=1 ./bin
           fi
 
-        
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
         if: steps.compile.outputs.status == 'success' && !cancelled()
