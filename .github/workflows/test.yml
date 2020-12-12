@@ -23,7 +23,7 @@ env:
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: true
-  CACHE: true
+  CACHE: false
   CACHE_VERSION: onlygit3
   TZ: Asia/Shanghai
 
@@ -31,12 +31,9 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     container:
-      image: huanghuibin/ubuntu-openwrt
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      image: openwrtorg/imagebuilder:ramips-mt7621-master
 
-
+        
     steps:
       # 本地代码
       - name: 【User】 Checkout
@@ -45,21 +42,10 @@ jobs:
       - name: 【OpenWrt】 Clone source code
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-
           cd openwrt
           git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
-
-      # 初始化环境
-      - name: 【Linux】 Initialization environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          df -h
-#sudo -E apt-get -y update
-#sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
-
 
       # 下载文件
       - name: 【Cache】 openwrt dl
@@ -71,26 +57,13 @@ jobs:
         with:
           path: |
             ./openwrt
+            !./openwrt/bin
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./
-          echo "======================="
-          du -h --max-depth=1 ./package
-
+          restore-keys: |
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       - name: Generate Prime Numbers
         run: |
-          
           if [ -d ./openwrt ]; then
               echo "file found..."
               cd openwrt && git pull
@@ -101,29 +74,82 @@ jobs:
 
       # - name: ext package
       #   run: |
-
       #     if [ ! -d ./openwrt/package/ext  ]; then
       #         echo "no dir found..."
-      #         mkdir  /openwrt/package/ext
+      #         mkdir  ./openwrt/package/ext
       #     fi
-          
       #     git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
       #     cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
-      - name: hash
+      - name: 【OpenWrt】 Update feeds
+        run: cd openwrt && ./scripts/feeds update -a
+
+      - name: 【OpenWrt】 Install feeds
+        run: cd openwrt && ./scripts/feeds install -a
+
+      # 自定义配置
+      - name: 【OpenWrt】 Load custom configuration
+        run: |
+          cp $DEFCONFIG_FILE ./openwrt/.config
+          echo "defconfig start"
+          cd openwrt
+          make defconfig
+
+      # openwrt 下载package    
+      - name: 【OpenWrt】 Download package
+        id: package
         run: |
           cd openwrt
-          git log --oneline -1
-          git log --oneline -1 | md5sum |cut -d" " -f1
-          echo "FIRMWARE_HASH=$(git log --oneline -1 | md5sum |cut -d" " -f1)" >> $GITHUB_ENV
-        
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
+          
+      # openwrt 编译固件 
+      - name: 【OpenWrt】 Compile the firmware
+        id: compile
+        run: |
+          export FORCE_UNSAFE_CONFIGURE=1
+          cd openwrt
+          echo "======================="
+          echo -e "thread compile: $(nproc) "
+          make -j$(($(nproc) + 1)) || make -j1 V=s
+          echo "======================="
+          echo "::set-output name=status::success"
+    
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
+          echo "======================="
+          if [ -d ./openwrt ]; then
+              du -h --max-depth=1 ./bin
+          fi
+
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
+        if: steps.compile.outputs.status == 'success' && !cancelled()
         with:
           name: OpenWrt-${{ env.CONFIG_TARGET }} 
           path: |
-            ./openwrt/doc
+            ./openwrt/bin/targets/
             !./openwrt/bin/targets/**/packages
             !./openwrt/bin/targets/**/*initramfs-kernel.bin
-        
-        
