@@ -30,9 +30,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container:
-      image: openwrtorg/imagebuilder:ramips-mt7621-master
-
+    # container:
+    #   image: huanghuibin/ubuntu-openwrt
+    #   credentials:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
         
     steps:
       # 本地代码
@@ -63,6 +65,7 @@ jobs:
             ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       - name: Generate Prime Numbers
+        if: env.CACHE == 'true'
         run: |
           if [ -d ./openwrt ]; then
               echo "file found..."
