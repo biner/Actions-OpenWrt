@@ -91,7 +91,7 @@ jobs:
             ./openwrt/${{ env.cache-name }}
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-cache-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       # 下载文件
       - name: 【Cache】 openwrt staging_dir
@@ -104,7 +104,7 @@ jobs:
             ./openwrt/${{ env.cache-name }}
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-cache-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       # 下载文件
       - name: 【Cache】 openwrt dl
@@ -117,7 +117,7 @@ jobs:
             ./openwrt/${{ env.cache-name }}
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-cache-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
 
       - name: Generate Prime Numbers
@@ -202,15 +202,15 @@ jobs:
               du -h --max-depth=1 ./bin
           fi
 
-      # - name: 【OpenWrt】 Upload artifact
-      #   uses: actions/upload-artifact@master
-      #   if: steps.compile.outputs.status == 'success' && !cancelled()
-      #   with:
-      #     name: OpenWrt-${{ env.CONFIG_TARGET }} 
-      #     path: |
-      #       ./openwrt/bin/targets/
-      #       !./openwrt/bin/targets/**/packages
-      #       !./openwrt/bin/targets/**/*initramfs-kernel.bin
+      - name: 【OpenWrt】 Upload artifact
+        uses: actions/upload-artifact@master
+        if: steps.compile.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt-${{ env.CONFIG_TARGET }} 
+          path: |
+            ./openwrt/bin/targets/
+            !./openwrt/bin/targets/**/packages
+            !./openwrt/bin/targets/**/*initramfs-kernel.bin
         
         
         
