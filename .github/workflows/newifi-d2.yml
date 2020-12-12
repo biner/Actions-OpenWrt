@@ -66,8 +66,14 @@ jobs:
 
       - name: Generate Prime Numbers
         run: |
-          cd openwrt && git pull
- 
+          if [ -d ./openwrt ]; then
+              echo "file found..."
+              cd openwrt && git pull
+          else
+              echo "no such file!"
+              git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          fi
+
       # - name: ext package
       #   run: |
       #     if [ ! -d ./openwrt/package/ext  ]; then
