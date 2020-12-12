@@ -30,11 +30,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    # container:
-    #   image: huanghuibin/ubuntu-openwrt
-    #   credentials:
-    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    container:
+      image: huanghuibin/ubuntu-openwrt
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         
     steps:
       # 本地代码
@@ -49,90 +49,25 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
-      # 清理磁盘
-      - name: 【Linux】 Free up disk space && Initialization environment
-        if: env.FREE_UP_DISK == 'true'
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo -E apt-get -qq update
-          sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean
-          sudo timedatectl set-timezone "$TZ"
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
-
-      # # 下载文件
-      # - name: 【Cache】 openwrt dl
-      #   id: cache-primes
-      #   if: env.CACHE == 'true'
-      #   uses: actions/cache@v2
-      #   env:
-      #     cache-name: cache-openwrt
-      #   with:
-      #     path: |
-      #       ./openwrt
-      #       !./openwrt/bin
-      #       !./openwrt/OpenClash
-      #     key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 下载文件
-      - name: 【Cache】 openwrt build_dir
-        if: env.CACHE == 'true'
-        uses: actions/cache@v2
-        env:
-          cache-name: build_dir
-        with:
-          path: |
-            ./openwrt/${{ env.cache-name }}
-          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
-      # 下载文件
-      - name: 【Cache】 openwrt staging_dir
-        if: env.CACHE == 'true'
-        uses: actions/cache@v2
-        env:
-          cache-name: staging_dir
-        with:
-          path: |
-            ./openwrt/${{ env.cache-name }}
-          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
-
       # 下载文件
       - name: 【Cache】 openwrt dl
+        id: cache-primes
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: dl222
+          cache-name: cache-openwrt
         with:
           path: |
-            ./openwrt/tmp
-            ./openwrt/dl
-            ./openwrt/feeds
-            ./openwrt/package
+            ./openwrt
+            !./openwrt/bin
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-dl-
-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
 
       - name: Generate Prime Numbers
         run: |
-          if [ -d ./openwrt ]; then
-              echo "file found..."
-              cd openwrt && git pull
-          else
-              echo "no such file!"
-              git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          fi
-
+          cd openwrt && git pull
+ 
       # - name: ext package
       #   run: |
       #     if [ ! -d ./openwrt/package/ext  ]; then
@@ -214,6 +149,3 @@ jobs:
             ./openwrt/bin/targets/
             !./openwrt/bin/targets/**/packages
             !./openwrt/bin/targets/**/*initramfs-kernel.bin
-        
-        
-        
