@@ -111,13 +111,16 @@ jobs:
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: dl
+          cache-name: dl222
         with:
           path: |
-            ./openwrt/${{ env.cache-name }}
+            ./openwrt/tmp
+            ./openwrt/dl
+            ./openwrt/feeds
+            ./openwrt/package
           key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-dl-
 
 
       - name: Generate Prime Numbers
