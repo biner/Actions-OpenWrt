@@ -60,9 +60,11 @@ jobs:
           path: |
             ./openwrt
             !./openwrt/bin
-          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          key: ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
 
       - name: Generate Prime Numbers
         run: |
