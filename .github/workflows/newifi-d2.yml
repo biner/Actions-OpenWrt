@@ -24,7 +24,6 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: false
   CACHE: true
-  CACHE_VERSION: auto
   TZ: Asia/Shanghai
 
 jobs:
@@ -62,8 +61,9 @@ jobs:
             !./openwrt/bin
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
+
 
       - name: Generate Prime Numbers
         run: |
@@ -83,7 +83,6 @@ jobs:
           fi
           git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
-
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
