@@ -75,12 +75,12 @@ jobs:
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: cache-openwrt
+          cache-name: openwrt
         with:
           path: |
             ./openwrt
             !./openwrt/build_dir/target*_musl
-            !./openwrt/bin
+            !./openwrt/doc
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
