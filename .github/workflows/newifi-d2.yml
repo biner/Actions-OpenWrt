@@ -58,11 +58,32 @@ jobs:
           path: |
             ./openwrt
             !./openwrt/bin
+            !./openwrt/build_dir/target*_musl
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
 
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./ 
+          echo "======================="
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
+
+          echo "======================="
+          if [ -d ./staging_dir ]; then
+              du -h --max-depth=1 ./staging_dir
+          fi
+
+          
       - name: Generate Prime Numbers
         run: |
           if [ -d ./openwrt ]; then
