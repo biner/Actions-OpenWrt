@@ -72,9 +72,16 @@ jobs:
           df -h
           echo "======================="
           cd openwrt
-          du -h --max-depth=1 ./
+          du -h --max-depth=1 ./ 
           echo "======================="
-          du -h --max-depth=1 ./build_dir
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
+
+          echo "======================="
+          if [ -d ./staging_dir ]; then
+              du -h --max-depth=1 ./staging_dir
+          fi
 
       - name: Generate Prime Numbers
         run: |
@@ -142,6 +149,7 @@ jobs:
           echo "======================="
           echo "::set-output name=status::success"
     
+            
       - name: 【OpenWrt】 space show
         run: |
           echo "======================="
@@ -150,12 +158,15 @@ jobs:
           df -h
           echo "======================="
           cd openwrt
-          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          du -h --max-depth=1 ./ 
           echo "======================="
-          du -h --max-depth=1 ./build_dir
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
+
           echo "======================="
-          if [ -d ./openwrt ]; then
-              du -h --max-depth=1 ./bin
+          if [ -d ./staging_dir ]; then
+              du -h --max-depth=1 ./staging_dir
           fi
 
       - name: 【OpenWrt】 Upload artifact
