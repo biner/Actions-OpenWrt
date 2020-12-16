@@ -40,11 +40,11 @@ jobs:
       - name: 【User】 Checkout
         uses: actions/checkout@master
       # 完整的openwrt源码
-      - name: 【OpenWrt】 Clone source code
-        run: |
-          cd ~
-          mkdir openwrt
-          mkdir openwrt/helloworld
+      # - name: 【OpenWrt】 Clone source code
+      #   run: |
+      #     cd ~
+      #     mkdir openwrt
+      #     mkdir openwrt/helloworld
 
       - name: 【OpenWrt】 space show
         run: |
@@ -81,9 +81,6 @@ jobs:
             !~/openwrt/b.txt
             !~/openwrt/aaa
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
-            ${{ env.cache-name }}-
             
       - name: 【OpenWrt】 space show
         run: |
