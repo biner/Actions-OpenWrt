@@ -40,12 +40,12 @@ jobs:
       - name: 【User】 Checkout
         uses: actions/checkout@master
       # 完整的openwrt源码
-      # - name: 【OpenWrt】 Clone source code
-      #   run: |
-      #     git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-      #     cd openwrt
-      #     git log  -1 --format='%H'
-      #     echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
+      - name: 【OpenWrt】 Clone source code
+        run: |
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          cd openwrt
+          git log  -1 --format='%H'
+          echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
 
 
@@ -66,19 +66,9 @@ jobs:
             
       - name: 【OpenWrt】 space show
         run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
           cd openwrt
-          du -h --max-depth=1 ./ 
-          echo "======================="
-          if [ -d ./build_dir ]; then
-              du -h --max-depth=1 ./build_dir
+          if [ ! -d ./mytest ]; then
+              mkdir mytest
           fi
 
-          echo "======================="
-          if [ -d ./staging_dir ]; then
-              du -h --max-depth=1 ./staging_dir
-          fi
+          du -h --max-depth=1 ./ 
