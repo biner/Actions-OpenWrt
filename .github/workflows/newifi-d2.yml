@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: newifi-d2
+  CONFIG_TARGET: newifi3
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -83,7 +83,7 @@ jobs:
               du -h --max-depth=1 ./staging_dir
           fi
 
-          
+
       - name: Generate Prime Numbers
         run: |
           if [ -d ./openwrt ]; then
