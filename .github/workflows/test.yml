@@ -61,9 +61,15 @@ jobs:
             ./openwrt
             !./openwrt/build_dir/target*_musl/
             !./openwrt/bin/
+            !./openwrt/mytest/
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
 
-            
+      - name: 【OpenWrt】 space show
+        run: |
+          cd openwrt
+          du -h --max-depth=1 ./ 
+
+
       - name: 【OpenWrt】 space show
         run: |
           cd openwrt
