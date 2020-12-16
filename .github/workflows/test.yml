@@ -42,6 +42,7 @@ jobs:
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
         run: |
+          cd ~
           mkdir openwrt
           mkdir openwrt/helloworld
 
@@ -76,9 +77,9 @@ jobs:
           cache-name: openwrt
         with:
           path: |
-            ./openwrt
-            !./openwrt/build_dir/target*_musl
-            !./openwrt/aaa
+            ~/openwrt
+            !~/openwrt/build_dir/target*_musl
+            !~/openwrt/aaa
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
