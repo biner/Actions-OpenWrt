@@ -53,7 +53,7 @@ jobs:
           echo "======================="
           df -h
           echo "======================="
-          cd openwrt
+          cd ~/openwrt
           du -h --max-depth=1 ./ 
           echo "======================="
           if [ -d ./build_dir ]; then
@@ -92,7 +92,7 @@ jobs:
           echo "======================="
           df -h
           echo "======================="
-          cd openwrt
+          cd ~/openwrt
           du -h --max-depth=1 ./ 
           echo "======================="
           if [ -d ./build_dir ]; then
@@ -108,7 +108,7 @@ jobs:
         run: |
           echo "======================="
           echo "Space usage:"
-          cd openwrt
+          cd ~/openwrt
           if [ ! -d ./aaa ]; then
               mkdir aaa
           fi
