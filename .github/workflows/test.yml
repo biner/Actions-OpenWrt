@@ -1,4 +1,4 @@
-name: Build OpenWrt newifi-d2
+name: Build OpenWrt Test
 
 on:
   release:
@@ -8,7 +8,7 @@ on:
       - master
     paths:
      # - 'makeconfig.d/newifi-d2/.config'
-      - '.github/workflows/newifi-d2.yml'
+      - '.github/workflows/test.yml'
 
   schedule:
     - cron: 59 3 1 * *
