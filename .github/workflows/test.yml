@@ -1,4 +1,4 @@
-name: Build OpenWrt Test
+name: Build OpenWrt newifi-d2
 
 on:
   release:
@@ -8,7 +8,7 @@ on:
       - master
     paths:
      # - 'makeconfig.d/newifi-d2/.config'
-      - '.github/workflows/test.yml'
+      - '.github/workflows/newifi-d2.yml'
 
   schedule:
     - cron: 59 3 1 * *
@@ -22,9 +22,8 @@ env:
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
-  UPLOAD_FIRMWARE_TRANSFER: true
-  CACHE: false
-  CACHE_VERSION: onlygit3
+  UPLOAD_FIRMWARE_TRANSFER: false
+  CACHE: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -35,7 +34,7 @@ jobs:
     #   credentials:
     #     username: ${{ secrets.DOCKERHUB_USERNAME }}
     #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        
+
     steps:
       # 本地代码
       - name: 【User】 Checkout
@@ -46,7 +45,6 @@ jobs:
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           cd openwrt
           git log  -1 --format='%H'
-          git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
       # 下载文件
@@ -59,13 +57,26 @@ jobs:
         with:
           path: |
             ./openwrt
+            !./openwrt/build_dir/target*_musl
             !./openwrt/bin
-          key: ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-${{ env.FIRMWARE_HASH }}
+          key:  ${{ env.cache-name }}-test-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.CONFIG_TARGET }}-${{ env.cache-name }}-${{ env.CACHE_VERSION }}-
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
+            
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
+          du -h --max-depth=1 ./build_dir
 
       - name: Generate Prime Numbers
-        if: env.CACHE == 'true'
         run: |
           if [ -d ./openwrt ]; then
               echo "file found..."
@@ -75,14 +86,14 @@ jobs:
               git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
           fi
 
-      # - name: ext package
-      #   run: |
-      #     if [ ! -d ./openwrt/package/ext  ]; then
-      #         echo "no dir found..."
-      #         mkdir  ./openwrt/package/ext
-      #     fi
-      #     git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-      #     cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
+      - name: ext package
+        run: |
+          if [ ! -d ./openwrt/package/ext  ]; then
+              echo "no dir found..."
+              mkdir  ./openwrt/package/ext
+          fi
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
