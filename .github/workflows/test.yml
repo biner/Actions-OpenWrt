@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: test224569
+  CONFIG_TARGET: ggg
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
