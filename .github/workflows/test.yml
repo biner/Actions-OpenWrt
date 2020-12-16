@@ -62,6 +62,7 @@ jobs:
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-newifi-d2-${{ env.FIRMWARE_HASH }}
+            ${{ env.cache-name }}-newifi-d2-
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
             
