@@ -112,9 +112,12 @@ jobs:
           if [ ! -d ./aaa ]; then
               mkdir aaa
           fi
+
           
           echo 1111 > ./aaa/test.txt
           echo bbb > b.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
           fi
+
+          du -h --max-depth=1 ./ 
