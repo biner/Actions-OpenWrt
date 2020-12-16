@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: ggg
+  CONFIG_TARGET: gggg2gg
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -114,8 +114,8 @@ jobs:
           fi
 
           
-          echo 1111 > ./aaa/test.txt
-          echo bbb > b.txt
+          touch aaa/file1.txt
+          touch b.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
           fi
