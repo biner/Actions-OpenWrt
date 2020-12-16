@@ -78,7 +78,7 @@ jobs:
         with:
           path: |
             ~/openwrt
-            !~/openwrt/build_dir/target*_musl
+            !~/openwrt/b.txt
             !~/openwrt/aaa
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
@@ -114,6 +114,7 @@ jobs:
           fi
           
           echo 1111 > ./aaa/test.txt
+          echo bbb > b.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
           fi
