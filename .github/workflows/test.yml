@@ -80,7 +80,7 @@ jobs:
           path: |
             ./openwrt
             !./openwrt/build_dir/target*_musl
-            !./openwrt/doc
+            !./openwrt/aaa
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
@@ -110,11 +110,11 @@ jobs:
           echo "======================="
           echo "Space usage:"
           cd openwrt
-          if [ ! -d ./bin ]; then
-              mkdir bin
+          if [ ! -d ./aaa ]; then
+              mkdir aaa
           fi
           
-          echo 1111 > ./bin/test.txt
+          echo 1111 > ./aaa/test.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
           fi
