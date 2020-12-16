@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: test22
+  CONFIG_TARGET: test22456
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -67,19 +67,6 @@ jobs:
           fi
 
 
-      - name: 【OpenWrt】 format
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          cd openwrt
-          if [ ! -d ./bin ]; then
-              mkdir bin
-          fi
-          
-          echo 1111 > ./bin/test.txt
-          if [ -d ./build_dir ]; then
-              mkdir build_dir/target123213_musl
-          fi
 
 
       # 下载文件
@@ -116,4 +103,18 @@ jobs:
           echo "======================="
           if [ -d ./staging_dir ]; then
               du -h --max-depth=1 ./staging_dir
+          fi
+
+      - name: 【OpenWrt】 format
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          cd openwrt
+          if [ ! -d ./bin ]; then
+              mkdir bin
+          fi
+          
+          echo 1111 > ./bin/test.txt
+          if [ -d ./build_dir ]; then
+              mkdir build_dir/target123213_musl
           fi
