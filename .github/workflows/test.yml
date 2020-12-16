@@ -47,6 +47,36 @@ jobs:
           git log  -1 --format='%H'
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./ 
+          echo "======================="
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
+
+          echo "======================="
+          if [ -d ./staging_dir ]; then
+              du -h --max-depth=1 ./staging_dir
+          fi
+
+
+      - name: 【OpenWrt】 format
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          cd openwrt
+          if [ -d ./build_dir ]; then
+              mkdir build_dir/target123213_musl
+          fi
+
+
       # 下载文件
       - name: 【Cache】 openwrt dl
         id: cache-primes
@@ -61,8 +91,6 @@ jobs:
             !./openwrt/bin
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
-            ${{ env.cache-name }}-newifi-d2-${{ env.FIRMWARE_HASH }}
-            ${{ env.cache-name }}-newifi-d2-
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
             
@@ -84,99 +112,3 @@ jobs:
           if [ -d ./staging_dir ]; then
               du -h --max-depth=1 ./staging_dir
           fi
-
-      - name: Generate Prime Numbers
-        run: |
-          if [ -d ./openwrt ]; then
-              echo "file found..."
-              cd openwrt && git pull
-          else
-              echo "no such file!"
-              git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          fi
-
-      - name: ext package
-        run: |
-          if [ ! -d ./openwrt/package/ext  ]; then
-              echo "no dir found..."
-              mkdir  ./openwrt/package/ext
-          fi
-          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
-
-      - name: 【OpenWrt】 Update feeds
-        run: cd openwrt && ./scripts/feeds update -a
-
-      - name: 【OpenWrt】 Install feeds
-        run: cd openwrt && ./scripts/feeds install -a
-
-      # 自定义配置
-      - name: 【OpenWrt】 Load custom configuration
-        run: |
-          cp $DEFCONFIG_FILE ./openwrt/.config
-          echo "defconfig start"
-          cd openwrt
-          make defconfig
-
-      # openwrt 下载package    
-      - name: 【OpenWrt】 Download package
-        id: package
-        run: |
-          cd openwrt
-          make download -j8
-          find dl -size -1024c -exec ls -l {} \;
-          find dl -size -1024c -exec rm -f {} \;
-          
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./
-          echo "======================="
-          du -h --max-depth=1 ./build_dir
-          
-      # openwrt 编译固件 
-      - name: 【OpenWrt】 Compile the firmware
-        id: compile
-        run: |
-          export FORCE_UNSAFE_CONFIGURE=1
-          cd openwrt
-          echo "======================="
-          echo -e "thread compile: $(nproc) "
-          make -j$(($(nproc) + 1)) || make -j1 V=s
-          echo "======================="
-          echo "::set-output name=status::success"
-    
-            
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./ 
-          echo "======================="
-          if [ -d ./build_dir ]; then
-              du -h --max-depth=1 ./build_dir
-          fi
-
-          echo "======================="
-          if [ -d ./staging_dir ]; then
-              du -h --max-depth=1 ./staging_dir
-          fi
-
-      - name: 【OpenWrt】 Upload artifact
-        uses: actions/upload-artifact@master
-        if: steps.compile.outputs.status == 'success' && !cancelled()
-        with:
-          name: OpenWrt-${{ env.CONFIG_TARGET }} 
-          path: |
-            ./openwrt/bin/targets/
-            !./openwrt/bin/targets/**/packages
-            !./openwrt/bin/targets/**/*initramfs-kernel.bin
