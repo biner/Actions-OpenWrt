@@ -104,6 +104,8 @@ jobs:
               du -h --max-depth=1 ./staging_dir
           fi
 
+          ls
+
       - name: 【OpenWrt】 format
         run: |
           echo "======================="
@@ -121,3 +123,4 @@ jobs:
           fi
 
           du -h --max-depth=1 ./ 
+          ls
