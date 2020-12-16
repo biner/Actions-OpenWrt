@@ -29,11 +29,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container:
-      image: huanghuibin/ubuntu-openwrt
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    # container:
+    #   image: huanghuibin/ubuntu-openwrt
+    #   credentials:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     steps:
       # 本地代码
@@ -48,6 +48,15 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
+      # 清理磁盘
+      - name: 【Linux】 Free up disk space
+        if: env.FREE_UP_DISK == 'true'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+
+          
       # 下载文件
       - name: 【Cache】 openwrt dl
         id: cache-primes
@@ -63,7 +72,6 @@ jobs:
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
-
 
       - name: Generate Prime Numbers
         run: |
