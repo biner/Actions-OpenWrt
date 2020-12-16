@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: newifi3
+  CONFIG_TARGET: test
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -59,8 +59,9 @@ jobs:
             ./openwrt
             !./openwrt/build_dir/target*_musl
             !./openwrt/bin
-          key:  ${{ env.cache-name }}-test-${{ env.FIRMWARE_HASH }}
+          key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
+            ${{ env.cache-name }}-newifi-d2-${{ env.FIRMWARE_HASH }}
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
             
