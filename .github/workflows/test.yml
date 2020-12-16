@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: test
+  CONFIG_TARGET: test22
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -72,7 +72,10 @@ jobs:
           echo "======================="
           echo "Space usage:"
           cd openwrt
-          mkdir bin
+          if [ ! -d ./bin ]; then
+              mkdir bin
+          fi
+          
           echo 1111 > ./bin/test.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
