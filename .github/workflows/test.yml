@@ -72,6 +72,8 @@ jobs:
           echo "======================="
           echo "Space usage:"
           cd openwrt
+          mkdir bin
+          echo 1111 > ./bin/test.txt
           if [ -d ./build_dir ]; then
               mkdir build_dir/target123213_musl
           fi
