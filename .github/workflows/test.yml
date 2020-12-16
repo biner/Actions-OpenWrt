@@ -18,7 +18,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_TARGET: gggg2gg211a
+  CONFIG_TARGET: test
   DEFCONFIG_FILE: ./makeconfig.d/newifi-d2/.config
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
@@ -42,29 +42,10 @@ jobs:
       # 完整的openwrt源码
       # - name: 【OpenWrt】 Clone source code
       #   run: |
-      #     cd ~
-      #     mkdir openwrt
-      #     mkdir openwrt/helloworld
-
-      - name: 【OpenWrt】 space show
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          echo "======================="
-          df -h
-          echo "======================="
-          cd ~/openwrt
-          du -h --max-depth=1 ./ 
-          echo "======================="
-          if [ -d ./build_dir ]; then
-              du -h --max-depth=1 ./build_dir
-          fi
-
-          echo "======================="
-          if [ -d ./staging_dir ]; then
-              du -h --max-depth=1 ./staging_dir
-          fi
-
+      #     git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+      #     cd openwrt
+      #     git log  -1 --format='%H'
+      #     echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
 
 
@@ -74,13 +55,14 @@ jobs:
         if: env.CACHE == 'true'
         uses: actions/cache@v2
         env:
-          cache-name: openwrt
+          cache-name: cache-openwrt
         with:
           path: |
-            ~/openwrt
-            !~/openwrt/b.txt
-            !~/openwrt/aaa
+            ./openwrt
+            !./openwrt/build_dir/target*_musl/
+            !./openwrt/bin/
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
+
             
       - name: 【OpenWrt】 space show
         run: |
@@ -89,7 +71,7 @@ jobs:
           echo "======================="
           df -h
           echo "======================="
-          cd ~/openwrt
+          cd openwrt
           du -h --max-depth=1 ./ 
           echo "======================="
           if [ -d ./build_dir ]; then
@@ -100,24 +82,3 @@ jobs:
           if [ -d ./staging_dir ]; then
               du -h --max-depth=1 ./staging_dir
           fi
-
-          ls
-
-      - name: 【OpenWrt】 format
-        run: |
-          echo "======================="
-          echo "Space usage:"
-          cd ~/openwrt
-          if [ ! -d ./aaa ]; then
-              mkdir aaa
-          fi
-
-          
-          touch aaa/file1.txt
-          touch b.txt
-          if [ -d ./build_dir ]; then
-              mkdir build_dir/target123213_musl
-          fi
-
-          du -h --max-depth=1 ./ 
-          ls
