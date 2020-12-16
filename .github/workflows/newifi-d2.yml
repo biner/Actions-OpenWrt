@@ -69,7 +69,24 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android
+
+          # 先创建一个空目录
+          # 注意：最好是用和被清空目录的所有者(用户)去创建这个空目录，使用的命令会将空目录的权限带过去
+          mkdir /tmp/empty
+          # 清除目标目录的文件,不要忘记目录后面的`/`
+          rsync --delete-before -av /tmp/empty/ /usr/share/dotnet/
+          rsync --delete-before -av /tmp/empty/ /usr/local/lib/android/
+
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
 
 
 
