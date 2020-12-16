@@ -48,6 +48,21 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
+      - name: 【OpenWrt】 space show
+        run: |
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          cd openwrt
+          du -h --max-depth=1 ./
+          echo "======================="
+          du -h --max-depth=1 /usr/share/dotnet
+          du -h --max-depth=1 /usr/local/lib/android
+          du -h --max-depth=1 /opt/ghc
+
+
       # 清理磁盘
       - name: 【Linux】 Free up disk space
         if: env.FREE_UP_DISK == 'true'
@@ -56,7 +71,7 @@ jobs:
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
 
-          
+
       # 下载文件
       - name: 【Cache】 openwrt dl
         id: cache-primes
