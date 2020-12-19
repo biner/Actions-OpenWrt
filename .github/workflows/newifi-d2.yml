@@ -103,6 +103,10 @@ jobs:
           git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
+          git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
+          cp helloworld openwrt/package/ext/helloworld -rf
+          
+
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
 
