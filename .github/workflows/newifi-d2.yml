@@ -10,7 +10,7 @@ on:
      # - 'makeconfig.d/newifi-d2/.config'
       - '.github/workflows/newifi-d2.yml'
   schedule:
-    - cron: 55 3 1 * *
+    - cron: 55 3 * * 5
 #  watch:
 #    types: [started]
 
