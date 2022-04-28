@@ -39,11 +39,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container:
-      image: huanghuibin/ubuntu-openwrt
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+#     container:
+#       image: huanghuibin/ubuntu-openwrt
+#       credentials:
+#         username: ${{ secrets.DOCKERHUB_USERNAME }}
+#         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     steps:
       # 清理磁盘
@@ -101,8 +101,10 @@ jobs:
               echo "no dir found..."
               mkdir  ./openwrt/package/ext
           fi
-          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
+          git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
+          cp helloworld openwrt/package/ext/helloworld -rf
+          
+          
 
       - name: 【OpenWrt】 Update feeds
         run: cd openwrt && ./scripts/feeds update -a
