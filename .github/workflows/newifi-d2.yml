@@ -51,7 +51,7 @@ jobs:
       - name: 【Cache】 openwrt dl
         id: cache-primes
         if: env.CACHE == 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-openwrt
         with:
