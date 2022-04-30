@@ -95,7 +95,7 @@ jobs:
 
       - name: ext package
         run: |
-          rm ./openwrt/package/ext -rf
+          #rm ./openwrt/package/ext -rf
           if [ ! -d ./openwrt/package/ext  ]; then
               echo "no dir found..."
               mkdir  ./openwrt/package/ext
