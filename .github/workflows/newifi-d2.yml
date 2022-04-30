@@ -83,7 +83,6 @@ jobs:
               du -h --max-depth=1 ./staging_dir
           fi
 
-
       - name: Generate Prime Numbers
         run: |
           if [ -d ./openwrt ]; then
