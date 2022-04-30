@@ -23,7 +23,7 @@ env:
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: false
-  CACHE: true
+  CACHE: false
   TZ: Asia/Shanghai
 
 jobs:
