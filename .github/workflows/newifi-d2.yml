@@ -53,7 +53,7 @@ jobs:
         if: env.CACHE == 'true'
         uses: actions/cache@v3
         env:
-          cache-name: cache-openwrt
+          cache-name: mycache-openwrt
         with:
           path: |
             ./openwrt
