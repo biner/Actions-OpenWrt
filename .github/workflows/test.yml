@@ -1,8 +1,5 @@
 name: Build OpenWrt Test
 
-
-name: Build OpenWrt x86_64
-
 on:
   release:
     types: [published]
@@ -10,7 +7,6 @@ on:
     branches:
       - master
     paths:
-#       - 'makeconfig.d/x86_64/.config'
       - '.github/workflows/x86_64.yml'
 
   schedule:
