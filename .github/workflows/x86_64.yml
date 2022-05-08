@@ -46,7 +46,6 @@ jobs:
 #         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     steps:
-      # 清理磁盘
       - name: 【Linux】 Free up disk space
         if: env.FREE_UP_DISK == 'true'
         env:
