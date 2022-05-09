@@ -28,7 +28,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     # container:
     #   image: huanghuibin/ubuntu-openwrt
     #   credentials:
@@ -100,10 +100,10 @@ jobs:
               echo "no dir found..."
               mkdir  ./openwrt/package/ext
           fi
-          #git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
           cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
 
-          #git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
+          git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
           cp helloworld openwrt/package/ext/helloworld -rf
           
           git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb.git -b master lua-maxminddb #git lua-maxminddb 依赖
