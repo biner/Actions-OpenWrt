@@ -179,6 +179,7 @@ jobs:
           if [ -d ./openwrt ]; then
               du -h --max-depth=1 ./bin
           fi
+          tar -zcvf /tmp/x86.tar.gz ./bin/targets/
 
       - name: 【OpenWrt】 Upload artifact
         uses: actions/upload-artifact@master
@@ -204,7 +205,7 @@ jobs:
 
           # The local directory (or file) you want to upload to bucket.
           # Default: './'
-          source_dir: './openwrt/bin/targets/'
+          source_dir: 'x86.tar.gz'
 
           # The directory inside of the bucket you want to upload to, namely key prefix prepended to dest file key.
           # Default: '/'
