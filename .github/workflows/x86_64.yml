@@ -33,7 +33,7 @@ env:
   FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
   UPLOAD_FIRMWARE_TRANSFER: true
-  CACHE: true
+  CACHE: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -99,12 +99,21 @@ jobs:
 
       - name: ext package
         run: |
+          #rm ./openwrt/package/ext -rf
           if [ ! -d ./openwrt/package/ext  ]; then
               echo "no dir found..."
               mkdir  ./openwrt/package/ext
           fi
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
+          cp OpenClash/luci-app-openclash openwrt/package/ext/luci-app-openclash -rf
           git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
           cp helloworld openwrt/package/ext/helloworld -rf
+          
+          git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb.git -b master lua-maxminddb #git lua-maxminddb 依赖
+          cp lua-maxminddb openwrt/package/ext/lua-maxminddb -rf
+          
+          git clone --depth 1 https://github.com/jerrykuku/luci-app-vssr.git -b master luci-app-vssr
+          cp luci-app-vssr openwrt/package/ext/luci-app-vssr -rf
           
           
 
