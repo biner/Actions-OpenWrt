@@ -58,7 +58,7 @@ jobs:
           sudo -E apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
           libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-      # 本地代码
+      # 缓存文件
       - name: 【User】 Checkout
         uses: actions/checkout@master
       # 完整的openwrt源码
@@ -70,17 +70,31 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
 
+      # 缓存文件
+      - name: 【Cache】 openwrt staging_dir
+        id: cache-staging
+        if: env.CACHE == 'true'
+        uses: actions/cache@master
+        env:
+          cache-name: cache-staging
+        with:
+          path: |
+            ./openwrt/staging_dir
+          key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
+            
       # 下载文件
       - name: 【Cache】 openwrt dl
         id: cache-primes
         if: env.CACHE == 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@master
         env:
-          cache-name: cache-openwrt
+          cache-name: cache-build
         with:
           path: |
-            ./openwrt
-            !./openwrt/bin
+            ./openwrt/build_dir
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
@@ -137,9 +151,15 @@ jobs:
           df -h
           echo "======================="
           cd openwrt
-          du -h --max-depth=1 ./
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
           echo "======================="
-          du -h --max-depth=1 ./build_dir
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
+          echo "======================="
+          if [ -d ./bin ]; then
+              du -h --max-depth=1 ./bin
+          fi
           
       # openwrt 编译固件 
       - name: 【OpenWrt】 Compile the firmware
@@ -163,9 +183,11 @@ jobs:
           cd openwrt
           du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
           echo "======================="
-          du -h --max-depth=1 ./build_dir
+          if [ -d ./build_dir ]; then
+              du -h --max-depth=1 ./build_dir
+          fi
           echo "======================="
-          if [ -d ./openwrt ]; then
+          if [ -d ./bin ]; then
               du -h --max-depth=1 ./bin
           fi
           tar -zcvf /tmp/x86.tar.gz ./bin/targets/
