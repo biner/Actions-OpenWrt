@@ -7,7 +7,7 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/test.yml'
+      - '.github/workflows/myjob.yml'
 
   schedule:
     - cron: 58 3 2 * *
