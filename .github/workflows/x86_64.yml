@@ -70,22 +70,7 @@ jobs:
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
       # 缓存文件
-      - name: 【Cache】 openwrt staging_dir
-        id: cache-staging
-        if: env.CACHE == 'true'
-        uses: actions/cache@master
-        env:
-          cache-name: cache-staging
-        with:
-          path: |
-            ./openwrt/staging_dir
-          key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
-            ${{ env.cache-name }}-
-            
-      # 下载文件
-      - name: 【Cache】 openwrt dl
+      - name: 【Cache】 openwrt all
         id: cache-primes
         if: env.CACHE == 'true'
         uses: actions/cache@v2
