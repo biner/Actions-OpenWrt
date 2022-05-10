@@ -66,8 +66,8 @@ jobs:
       # 完整的openwrt源码
       - name: 【OpenWrt】 Clone source code
         run: |
-          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          cd openwrt
+          cd ~/data0
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH lede
           git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
@@ -81,14 +81,30 @@ jobs:
           cache-name: cache-staging
         with:
           path: |
-            ./openwrt/staging_dir
+            ~/data0/lede/staging_dir
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
             
       # 下载文件
-      - name: 【Cache】 openwrt dl
+      - name: 【Cache】 openwrt tmp
+        id: cache-bin
+        if: env.CACHE == 'true'
+        uses: actions/cache@master
+        env:
+          cache-name: cache-tmp
+        with:
+          path: |
+            ~/data0/lede/tmp
+          key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
+
+
+      # 下载文件
+      - name: 【Cache】 openwrt build
         id: cache-primes
         if: env.CACHE == 'true'
         uses: actions/cache@master
@@ -96,51 +112,55 @@ jobs:
           cache-name: cache-build
         with:
           path: |
-            ./openwrt/build_dir
+            ~/data0/lede/build_dir
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
-
-
-      - name: Generate Prime Numbers
-        run: |
-          if [ -d ./openwrt ]; then
-              echo "file found..."
-              cd openwrt && git pull
-          else
-              echo "no such file!"
-              git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          fi
+            
+      # 下载文件
+      - name: 【Cache】 openwrt build
+        id: cache-dl
+        if: env.CACHE == 'true'
+        uses: actions/cache@master
+        env:
+          cache-name: cache-dl
+        with:
+          path: |
+            ~/data0/lede/dl
+          key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
+            ${{ env.cache-name }}-
+            
 
       - name: ext package
         run: |
-
-          cd openwrt 
+          cd ~/data0/lede 
           echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
           echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
           
           
 
       - name: 【OpenWrt】 Update feeds
-        run: cd openwrt && ./scripts/feeds update -a
+        run: cd ~/data0/lede && ./scripts/feeds update -a
 
       - name: 【OpenWrt】 Install feeds
-        run: cd openwrt && ./scripts/feeds install -a
+        run: cd ~/data0/lede && ./scripts/feeds install -a
 
       # 自定义配置
       - name: 【OpenWrt】 Load custom configuration
         run: |
-          cp $DEFCONFIG_FILE ./openwrt/.config
+          cp $DEFCONFIG_FILE ~/data0/lede/.config
           echo "defconfig start"
-          cd openwrt
+          cd ~/data0/lede
           make defconfig
 
       # openwrt 下载package    
       - name: 【OpenWrt】 Download package
         id: package
         run: |
-          cd openwrt
+          cd ~/data0/lede
           make download -j8
           find dl -size -1024c -exec ls -l {} \;
           find dl -size -1024c -exec rm -f {} \;
@@ -152,11 +172,15 @@ jobs:
           echo "======================="
           df -h
           echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          cd ~/data0/lede
+          du -h --max-depth=1 ./ 
           echo "======================="
           if [ -d ./build_dir ]; then
               du -h --max-depth=1 ./build_dir
+          fi
+          echo "======================="
+          if [ -d ./bin ]; then
+              du -h --max-depth=1 ./staging_dir
           fi
           echo "======================="
           if [ -d ./bin ]; then
@@ -168,7 +192,7 @@ jobs:
         id: compile
         run: |
           export FORCE_UNSAFE_CONFIGURE=1
-          cd openwrt
+          cd ~/data0/lede
           echo "======================="
           echo -e "thread compile: $(nproc) "
           make -j$(($(nproc) + 1)) || make -j1 V=s
@@ -185,23 +209,26 @@ jobs:
           echo "======================="
           df -h
           echo "======================="
-          cd openwrt
-          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          cd ~/data0/lede
+          du -h --max-depth=1 ./ 
           echo "======================="
           if [ -d ./build_dir ]; then
               du -h --max-depth=1 ./build_dir
           fi
           echo "======================="
           if [ -d ./bin ]; then
+              du -h --max-depth=1 ./staging_dir
+          fi
+          echo "======================="
+          if [ -d ./bin ]; then
               du -h --max-depth=1 ./bin
           fi
-          tar -zcvf /tmp/x86.tar.gz ./bin/targets/
 
       - name: Organize files
         id: organize
         if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
         run: |
-          echo "FIRMWARE=./openwrt/bin/targets" >> $GITHUB_ENV
+          echo "FIRMWARE=~/data0/lede/bin/targets" >> $GITHUB_ENV
           echo "::set-output name=status::success"
         
 
@@ -211,9 +238,9 @@ jobs:
         with:
           name: OpenWrt-${{ env.CONFIG_TARGET }} 
           path: |
-            ./openwrt/bin/targets/
-            !./openwrt/bin/targets/**/packages
-            !./openwrt/bin/targets/**/*initramfs-kernel.bin
+            ~/data0/lede/bin/targets/
+            !~/data0/lede/bin/targets/**/packages
+            !~/data0/lede/bin/targets/**/*initramfs-kernel.bin
 
       - name: Upload firmware directory
         uses: actions/upload-artifact@master
