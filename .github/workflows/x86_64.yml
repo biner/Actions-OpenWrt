@@ -30,7 +30,7 @@ env:
   CONFIG_TARGET: x86_64
   DEFCONFIG_FILE: ./makeconfig.d/x86_64/.config
   DIY_SH: diy.sh
-  FREE_UP_DISK: true
+  FREE_UP_DISK: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: true
   UPLOAD_WETRANSFER: true
@@ -54,6 +54,7 @@ jobs:
 
     steps:
       - name: 【Linux】 Free up disk space
+        if: env.FREE_UP_DISK == 'true'
         run: |
           sudo -E apt update -y
           sudo -E apt full-upgrade -y
