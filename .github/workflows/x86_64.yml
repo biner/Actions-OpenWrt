@@ -68,7 +68,8 @@ jobs:
         run: |
           mkdir ~/data0
           cd ~/data0
-          git clone --depth 1 https://github.com/coolsnowwolf/lede.git -b master
+          ls
+          git clone http://github.com/coolsnowwolf/lede.git
           git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
@@ -227,7 +228,7 @@ jobs:
 
       - name: Organize files
         id: organize
-        if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        if: steps.compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
         run: |
           echo "FIRMWARE=~/data0/lede/bin/targets" >> $GITHUB_ENV
           echo "::set-output name=status::success"
