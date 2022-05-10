@@ -72,6 +72,7 @@ jobs:
           ls
           git clone http://github.com/coolsnowwolf/lede.git
           echo "git clone ok"
+          cd ~/data0/lede
           git log  -1 --format='%H'
           git log --oneline -1 | md5sum |cut -d" " -f1
           echo "FIRMWARE_HASH=$(git log  -1 --format='%H')" >> $GITHUB_ENV
