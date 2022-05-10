@@ -30,7 +30,7 @@ env:
   CONFIG_TARGET: x86_64
   DEFCONFIG_FILE: ./makeconfig.d/x86_64/.config
   DIY_SH: diy.sh
-  FREE_UP_DISK: false
+  FREE_UP_DISK: true
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: true
   UPLOAD_WETRANSFER: true
@@ -70,7 +70,7 @@ jobs:
           mkdir ~/data0
           cd ~/data0
           ls
-          git clone http://github.com/coolsnowwolf/lede.git
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH lede
           echo "git clone ok"
           cd ~/data0/lede
           git log  -1 --format='%H'
@@ -118,13 +118,14 @@ jobs:
         with:
           path: |
             ~/data0/lede/build_dir
+            !~/data0/lede/build_dir/target*_musl
           key:  ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-${{ env.FIRMWARE_HASH }}
           restore-keys: |
             ${{ env.cache-name }}-${{ env.CONFIG_TARGET }}-
             ${{ env.cache-name }}-
             
       # 下载文件
-      - name: 【Cache】 openwrt build
+      - name: 【Cache】 openwrt dl
         id: cache-dl
         if: env.CACHE == 'true'
         uses: actions/cache@master
@@ -189,7 +190,7 @@ jobs:
           fi
           echo "======================="
           if [ -d ./bin ]; then
-              du -h --max-depth=1 ./bin
+              du -h --max-depth=1 ./tmp
           fi
           
       # openwrt 编译固件 
@@ -226,7 +227,7 @@ jobs:
           fi
           echo "======================="
           if [ -d ./bin ]; then
-              du -h --max-depth=1 ./bin
+              du -h --max-depth=1 ./tmp
           fi
 
       - name: Organize files
