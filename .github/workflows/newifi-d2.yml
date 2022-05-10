@@ -98,22 +98,9 @@ jobs:
 
       - name: ext package
         run: |
-          #rm ~/data0/lede/package/ext -rf
-          if [ ! -d ~/data0/lede/package/ext  ]; then
-              echo "no dir found..."
-              mkdir  ~/data0/lede/package/ext
-          fi
-          git clone --depth 1 https://github.com/vernesong/OpenClash.git -b master OpenClash
-          cp OpenClash/luci-app-openclash ~/data0/lede/package/ext/luci-app-openclash -rf
-
-          git clone --depth 1 https://github.com/fw876/helloworld.git -b master helloworld
-          cp helloworld ~/data0/lede/package/ext/helloworld -rf
-          
-          git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb.git -b master lua-maxminddb #git lua-maxminddb 依赖
-          cp lua-maxminddb ~/data0/lede/package/ext/lua-maxminddb -rf
-          
-          git clone --depth 1 https://github.com/jerrykuku/luci-app-vssr.git -b master luci-app-vssr
-          cp luci-app-vssr ~/data0/lede/package/ext/luci-app-vssr -rf
+          cd ~/data0/lede 
+          echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
+          echo 'src-git openclash https://github.com/vernesong/OpenClash.git' >>feeds.conf.default
 
 
       - name: 【OpenWrt】 Update feeds
