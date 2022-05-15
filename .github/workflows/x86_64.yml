@@ -194,7 +194,7 @@ jobs:
         run: |
           echo "FIRMWARE=./openwrt/bin/targets/" >> $GITHUB_ENV
           echo "::set-output name=status::success"
-        
+      
         
       - name: Upload firmware to cowtransfer
         id: cowtransfer
